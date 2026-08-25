@@ -14,13 +14,9 @@
 # ENVIRONMENT
 #--------------------------------------------------------------------
 
-CI_ENVIRONMENT = development
-
 #--------------------------------------------------------------------
 # APP
 #--------------------------------------------------------------------
-
-app.baseURL = 'http://localhost:8080/'
 
 # If you have trouble with `.`, you could also use `_`.
 # app_baseURL = ''
@@ -30,13 +26,6 @@ app.baseURL = 'http://localhost:8080/'
 #--------------------------------------------------------------------
 # DATABASE
 #--------------------------------------------------------------------
-
-database.default.hostname = localhost
-database.default.database = logistransport_db
-database.default.username = root
-database.default.password = 
-database.default.DBDriver = MySQLi
-database.default.port = 3306
 
 # If you use MySQLi as tests, first update the values of Config\Database::$tests.
 # database.tests.hostname = localhost
