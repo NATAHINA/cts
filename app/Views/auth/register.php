@@ -62,6 +62,28 @@
         .btn-auth:hover{ background:var(--lc-accent-ink); border-color:var(--lc-accent-ink); color:#fff; }
         .auth-foot{ text-align:center; font-size:14px; color:var(--lc-ink-soft); margin-top:18px; }
         .auth-foot a{ color:var(--lc-accent-ink); font-weight:700; text-decoration:none; }
+        .password-wrapper{
+            position: relative;
+        }
+        .password-wrapper .form-control{
+            padding-right: 42px;
+        }
+        .password-toggle{
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--lc-ink-soft);
+            cursor: pointer;
+            padding: 4px;
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+        .password-toggle:hover{
+            color: var(--lc-accent);
+        }
     </style>
 </head>
 <body>
@@ -93,12 +115,12 @@
 
                     <div class="row">
                         <div class="col-sm-6 mb-3">
-                            <label for="prenom" class="form-label">Prénom</label>
-                            <input type="text" class="form-control" id="prenom" name="prenom" value="<?= esc(old('prenom')) ?>">
-                        </div>
-                        <div class="col-sm-6 mb-3">
                             <label for="nom" class="form-label">Nom</label>
                             <input type="text" class="form-control" id="nom" name="nom" value="<?= esc(old('nom')) ?>" required>
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <label for="prenom" class="form-label">Prénom</label>
+                            <input type="text" class="form-control" id="prenom" name="prenom" value="<?= esc(old('prenom')) ?>">
                         </div>
                     </div>
 
@@ -110,11 +132,38 @@
                     <div class="row">
                         <div class="col-sm-6 mb-3">
                             <label for="password" class="form-label">Mot de passe</label>
-                            <input type="password" class="form-control" id="password" name="password" minlength="6" required>
+                            <div class="password-wrapper">
+                                <input type="password"
+                                    class="form-control"
+                                    id="password"
+                                    name="password"
+                                    minlength="6"
+                                    required>
+                                <button type="button"
+                                        class="password-toggle"
+                                        data-target="password"
+                                        aria-label="Afficher le mot de passe">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
                         </div>
+
                         <div class="col-sm-6 mb-3">
                             <label for="password_confirm" class="form-label">Confirmer</label>
-                            <input type="password" class="form-control" id="password_confirm" name="password_confirm" minlength="6" required>
+                            <div class="password-wrapper">
+                                <input type="password"
+                                    class="form-control"
+                                    id="password_confirm"
+                                    name="password_confirm"
+                                    minlength="6"
+                                    required>
+                                <button type="button"
+                                        class="password-toggle"
+                                        data-target="password_confirm"
+                                        aria-label="Afficher le mot de passe">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -128,5 +177,28 @@
         </div>
 
     </div>
+
+    <script>
+document.querySelectorAll('.password-toggle').forEach(function(btn) {
+    btn.addEventListener('click', function () {
+        const targetId = this.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+        const icon  = this.querySelector('i');
+
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+            this.setAttribute('aria-label', 'Masquer le mot de passe');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+            this.setAttribute('aria-label', 'Afficher le mot de passe');
+        }
+    });
+});
+</script>
+
 </body>
 </html>

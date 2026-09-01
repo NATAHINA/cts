@@ -119,7 +119,7 @@
                     <div class="mb-2">
                         <div class="d-flex justify-content-between align-items-center">
                             <label for="password" class="form-label mb-0">Mot de passe</label>
-                            <a href="<?= site_url('forgot-password') ?>" class="forgot-link">Mot de passe oublié ?</a>
+                            <a href="<?= site_url('forgot-password') ?>" class="forgot-link m-2">Mot de passe oublié ?</a>
                         </div>
                         <div class="password-wrapper">
                             <input type="password" class="form-control" id="password" name="password" required>

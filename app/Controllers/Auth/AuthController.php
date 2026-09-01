@@ -90,7 +90,7 @@ class AuthController extends BaseController
             'isLoggedIn' => true,
             'user_id'    => $user['id'],
             'user_nom'   => trim(
-                ($user['prenom'] ?? '') . ' ' . $user['nom']
+                ($user['nom'] ?? '') . ' ' . $user['prenom']
             ),
             'user_role'  => $user['role_id'],
             'tenant_id'  => $tenant['id'],
@@ -195,7 +195,7 @@ class AuthController extends BaseController
         session()->set([
             'isLoggedIn' => true,
             'user_id'    => $userId,
-            'user_nom'   => trim($this->request->getPost('prenom') . ' ' . $this->request->getPost('nom')),
+            'user_nom'   => trim($this->request->getPost('nom') . ' ' . $this->request->getPost('prenom')),
             'user_role'  => 'admin',
             'tenant_id'  => $tenantId,
             'tenant_nom' => $this->request->getPost('nom_agence'),
@@ -253,16 +253,27 @@ class AuthController extends BaseController
         $resetLink  = site_url('reset-password/' . $rawToken);
 
         $emailService = \Config\Services::email();
+
+        $emailService->setFrom(
+            env('email.fromEmail'),
+            env('email.fromName')
+        );
         $emailService->setTo($email);
-        $emailService->setFrom(env('email.fromEmail'), env('email.fromName'));
         $emailService->setSubject('Réinitialisation de votre mot de passe — CTS');
         $emailService->setMailType('html');
-        $emailService->setMessage(
-            view('emails/reset_password', ['resetLink' => $resetLink])
-        );
+        // $emailService->setCharset('utf-8');
+        $emailService->setNewline("\r\n");
+        $emailService->setCRLF("\r\n");
 
-        if (! $emailService->send()) {
-            log_message('error', 'Envoi email reset password échoué : ' . $emailService->printDebugger(['headers']));
+        $message = view('emails/reset_password', [
+            'resetLink' => $resetLink,
+            'email'     => $email,
+        ]);
+
+        $emailService->setMessage($message);
+
+        if (!$emailService->send(false)) {
+            log_message('error', 'Échec envoi email reset : ' . $emailService->printDebugger(['headers', 'subject', 'body']));
         }
 
         return redirect()->to('/login')->with('success', $genericSuccess);
@@ -312,7 +323,7 @@ class AuthController extends BaseController
         }
 
         $userModel->update($user['id'], [
-            'password_hash' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
+            'password' => $this->request->getPost('password'),
         ]);
 
         $resetModel->deleteForEmail($row['email']);

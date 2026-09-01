@@ -19,8 +19,8 @@ class Email extends BaseConfig
     public string $protocol = 'smtp';
 
     public string $SMTPHost = 'smtp.gmail.com';
-    public string $SMTPUser = '';
-    public string $SMTPPass = '';
+    public string $SMTPUser = 'natahina.rochaya@gmail.com';
+    public string $SMTPPass = 'cxpuwnnledohgyzl';
     public int    $SMTPPort = 587;
     public string $SMTPCrypto = 'tls';
     public bool   $SMTPKeepAlive = false;

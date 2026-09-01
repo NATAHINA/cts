@@ -27,6 +27,28 @@
         .form-control:focus{ border-color:var(--lc-accent); box-shadow:0 0 0 3px var(--lc-accent-soft); }
         .btn-auth{ background:var(--lc-accent); border-color:var(--lc-accent); color:#fff; font-weight:700; border-radius:9px; padding:10px; }
         .btn-auth:hover{ background:var(--lc-accent-ink); border-color:var(--lc-accent-ink); color:#fff; }
+        .password-wrapper{
+            position: relative;
+        }
+        .password-wrapper .form-control{
+            padding-right: 42px;
+        }
+        .password-toggle{
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--lc-ink-soft);
+            cursor: pointer;
+            padding: 4px;
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+        .password-toggle:hover{
+            color: var(--lc-accent);
+        }
     </style>
 </head>
 <body>
@@ -44,11 +66,26 @@
 
             <div class="mb-3">
                 <label for="password" class="form-label">Nouveau mot de passe</label>
-                <input type="password" class="form-control" id="password" name="password" minlength="6" required autofocus>
+                <div class="password-wrapper">
+                    <input type="password" class="form-control" id="password" name="password" minlength="6" required autofocus>
+                    <button type="button" class="password-toggle"
+                            data-target="password"
+                            aria-label="Afficher le mot de passe">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+                
             </div>
             <div class="mb-3">
                 <label for="password_confirm" class="form-label">Confirmer</label>
-                <input type="password" class="form-control" id="password_confirm" name="password_confirm" minlength="6" required>
+                <div class="password-wrapper">
+                    <input type="password" class="form-control" id="password_confirm" name="password_confirm" minlength="6" required>
+                    <button type="button" class="password-toggle"
+                            data-target="password_confirm"
+                            aria-label="Afficher le mot de passe">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
             </div>
 
             <button type="submit" class="btn btn-auth w-100">Réinitialiser</button>

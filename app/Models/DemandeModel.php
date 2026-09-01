@@ -39,17 +39,27 @@ class DemandeModel extends Model
 
     public function generateNumero(int $tenantId): string
     {
+        $year = date('Y');
+
         $last = $this
             ->where('tenant_id', $tenantId)
+            ->like('numero', "DEM-{$year}-", 'after')
             ->orderBy('id', 'DESC')
             ->first();
 
-        $numero = 1;
+        $next = 1;
 
         if ($last && !empty($last['numero'])) {
-            $numero = ((int) preg_replace('/\D/', '', $last['numero'])) + 1;
+            $parts = explode('-', $last['numero']);
+            $lastNumber = (int) end($parts);
+
+            $next = $lastNumber + 1;
         }
 
-        return 'DEM-' . date('Y') . '-' . str_pad($numero, 5, '0', STR_PAD_LEFT);
+        $formatted = $next < 100000
+            ? str_pad((string) $next, 5, '0', STR_PAD_LEFT)
+            : (string) $next;
+
+        return "DEM-{$year}-{$formatted}";
     }
 }
