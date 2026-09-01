@@ -9,7 +9,8 @@ class DestinationModel extends TenantModel
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useTimestamps    = true;
-    protected $allowedFields    = [
+
+    protected $allowedFields = [
         'tenant_id',
         'nom',
         'pays',

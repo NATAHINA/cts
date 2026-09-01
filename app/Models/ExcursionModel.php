@@ -17,7 +17,7 @@ class ExcursionModel extends TenantModel
         'duree_heures',
         'prix',
         'prix_adulte', 'prix_enfant', 'prix_groupe',
-        'fournisseur', 'disponibilite',
+        'fournisseur_id', 'disponibilite',
         'devise_id',
         'statut',
     ];

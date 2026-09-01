@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+	<link rel="icon" type="image/x-icon" href="https://img.icons8.com/color/48/airplane-take-off.ico">
     <style>
         :root{ --lc-accent:#4C5FD5; --lc-accent-light:#7C89E8; --lc-accent-ink:#37419E; --lc-accent-soft:rgba(76,95,213,0.10); --lc-ink:#1c1e2b; --lc-ink-soft:#6b6d7c; --lc-line:#e6e6ee; }
         *{ box-sizing:border-box; }
@@ -63,6 +64,28 @@
         .auth-foot{ text-align:center; font-size:14px; color:var(--lc-ink-soft); margin-top:18px; }
         .auth-foot a{ color:var(--lc-accent-ink); font-weight:700; text-decoration:none; }
         .forgot-link{ font-size:13px; color:var(--lc-accent-ink); text-decoration:none; font-weight:600; }
+
+        /* Toggle mot de passe */
+        .password-wrapper{ position:relative; }
+        .password-wrapper .form-control{ padding-right:42px; }
+        .toggle-password{
+            position:absolute;
+            right:10px;
+            top:50%;
+            transform:translateY(-50%);
+            background:none;
+            border:none;
+            color:var(--lc-ink-soft);
+            padding:0;
+            cursor:pointer;
+            font-size:1.15rem;
+            line-height:1;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+        .toggle-password:hover{ color:var(--lc-accent); }
+        .toggle-password:focus{ outline:none; }
     </style>
 </head>
 <body>
@@ -98,7 +121,12 @@
                             <label for="password" class="form-label mb-0">Mot de passe</label>
                             <a href="<?= site_url('forgot-password') ?>" class="forgot-link">Mot de passe oublié ?</a>
                         </div>
-                        <input type="password" class="form-control" id="password" name="password" required>
+                        <div class="password-wrapper">
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <button type="button" class="toggle-password" id="togglePassword" aria-label="Afficher le mot de passe">
+                                <i class="bi bi-eye" id="toggleIcon"></i>
+                            </button>
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-auth w-100 mt-3">Se connecter</button>
                 </form>
@@ -110,5 +138,19 @@
         </div>
 
     </div>
+
+    <script>
+        const toggleBtn = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const toggleIcon = document.getElementById('toggleIcon');
+
+        toggleBtn.addEventListener('click', function () {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            toggleIcon.classList.toggle('bi-eye', !isPassword);
+            toggleIcon.classList.toggle('bi-eye-slash', isPassword);
+            toggleBtn.setAttribute('aria-label', isPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+        });
+    </script>
 </body>
 </html>

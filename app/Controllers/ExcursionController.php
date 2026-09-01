@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\ExcursionModel;
 use App\Models\DestinationModel;
 use App\Models\DeviseModel;
+use App\Models\FournisseurModel;
 
 class ExcursionController extends BaseController
 {
@@ -12,17 +13,38 @@ class ExcursionController extends BaseController
     {
         $model = new ExcursionModel();
         $query = trim((string) $this->request->getGet('q')); $statut = (string) $this->request->getGet('statut');
-        if ($query !== '') { $model->groupStart()->like('excursions.nom', $query)->orLike('destinations.nom', $query)->orLike('excursions.fournisseur', $query)->groupEnd(); }
-        if (in_array($statut, ['actif', 'inactif', 'disponible', 'indisponible'], true)) { $model->where($statut === 'actif' || $statut === 'inactif' ? 'excursions.statut' : 'excursions.disponibilite', $statut); }
-        $data = [
-            'title' => 'Excursions',
-            'items' => $model
-            ->select('excursions.*, destinations.nom as destination_nom')
-            ->join('destinations', 'destinations.id = excursions.destination_id', 'left')->orderBy('excursions.created_at', 'DESC')->findAll(),
-            'q' => $query, 'statutFiltre' => $statut,
-        ];
 
-        return view('excursions/index', $data);
+        $model
+            ->select('
+                excursions.*,
+                destinations.nom AS destination_nom,
+                fournisseurs.nom AS fournisseur_nom
+            ')
+            ->join(
+                'destinations',
+                'destinations.id = excursions.destination_id',
+                'left'
+            )
+            ->join(
+                'fournisseurs',
+                'fournisseurs.id = excursions.fournisseur_id',
+                'left'
+            );
+
+        if ($query !== '') { $model->groupStart()->like('excursions.nom', $query)->orLike('destinations.nom', $query)->orLike('fournisseur.nom', $query)->groupEnd(); }
+        if (in_array($statut, ['actif', 'inactif', 'disponible', 'indisponible'], true)) { $model->where($statut === 'actif' || $statut === 'inactif' ? 'excursions.statut' : 'excursions.disponibilite', $statut); }
+        
+        $items = $model
+            ->orderBy('excursions.created_at', 'DESC')
+            ->findAll();
+
+        return view('excursions/index', [
+            'title'        => 'Excursions',
+            'items'        => $items,
+            'q'            => $query,
+            'statutFiltre' => $statut,
+        ]);
+
     }
 
     public function create()
@@ -33,6 +55,8 @@ class ExcursionController extends BaseController
         $data['destinations'] = $destinationModel->orderBy('nom', 'ASC')->findAll();
         $deviseModel = new DeviseModel();
         $data['devises'] = $deviseModel->orderBy('code', 'ASC')->findAll();
+        $fournisseurModel = new FournisseurModel();
+        $data['fournisseurs'] = $fournisseurModel->orderBy('nom', 'ASC')->findAll();
 
         return view('excursions/form', $data);
     }
@@ -41,7 +65,7 @@ class ExcursionController extends BaseController
     {
         $model = new ExcursionModel();
 
-        $model->insert([
+        $data = [
             'tenant_id' => session('tenant_id'),
             'destination_id' => $this->request->getPost('destination_id'),
             'nom' => $this->request->getPost('nom'),
@@ -49,10 +73,21 @@ class ExcursionController extends BaseController
             'duree_heures' => $this->request->getPost('duree_heures'),
             'prix' => $this->request->getPost('prix'),
             'prix_adulte' => $this->request->getPost('prix_adulte') ?: null, 'prix_enfant' => $this->request->getPost('prix_enfant') ?: null, 'prix_groupe' => $this->request->getPost('prix_groupe') ?: null,
-            'fournisseur' => $this->request->getPost('fournisseur'), 'disponibilite' => $this->request->getPost('disponibilite') ?: 'disponible',
+            'fournisseur_id' => $this->request->getPost('fournisseur_id') ?: null,
+            'disponibilite' => $this->request->getPost('disponibilite') ?: 'disponible',
             'devise_id' => $this->request->getPost('devise_id'),
             'statut' => $this->request->getPost('statut'),
-        ]);
+        ];
+
+        if (! $model->insert($data)) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'Impossible d\'enregistrer l\'excursions.'
+                );
+        }
 
         return redirect()->to('/excursions')->with('success', "Enregistré avec succès.");
     }
@@ -72,6 +107,8 @@ class ExcursionController extends BaseController
         $data['destinations'] = $destinationModel->orderBy('nom', 'ASC')->findAll();
         $deviseModel = new DeviseModel();
         $data['devises'] = $deviseModel->orderBy('code', 'ASC')->findAll();
+        $fournisseurModel = new FournisseurModel();
+        $data['fournisseurs'] = $fournisseurModel->orderBy('nom', 'ASC')->findAll();
 
         return view('excursions/form', $data);
     }
@@ -87,7 +124,8 @@ class ExcursionController extends BaseController
             'duree_heures' => $this->request->getPost('duree_heures'),
             'prix' => $this->request->getPost('prix'),
             'prix_adulte' => $this->request->getPost('prix_adulte') ?: null, 'prix_enfant' => $this->request->getPost('prix_enfant') ?: null, 'prix_groupe' => $this->request->getPost('prix_groupe') ?: null,
-            'fournisseur' => $this->request->getPost('fournisseur'), 'disponibilite' => $this->request->getPost('disponibilite') ?: 'disponible',
+            'fournisseur_id' => $this->request->getPost('fournisseur_id') ?: null, 
+            'disponibilite' => $this->request->getPost('disponibilite') ?: 'disponible',
             'devise_id' => $this->request->getPost('devise_id'),
             'statut' => $this->request->getPost('statut'),
         ]);
@@ -98,8 +136,32 @@ class ExcursionController extends BaseController
     public function delete($id)
     {
         $model = new ExcursionModel();
-        $model->delete($id);
+        $item = $model->find($id);
 
-        return redirect()->to('/excursions')->with('success', "Supprimé avec succès.");
+        if (! $item) {
+            return redirect()
+                ->to(site_url('excursions'))
+                ->with(
+                    'error',
+                    'Excursions introuvable.'
+                );
+        }
+
+        if (! $model->delete($id)) {
+            return redirect()
+                ->to(site_url('excursions'))
+                ->with(
+                    'error',
+                    'Impossible de supprimer cette excursion.'
+                );
+        }
+
+        return redirect()
+            ->to(site_url('excursions'))
+            ->with(
+                'success',
+                'Excursions supprimé avec succès.'
+            );
+    
     }
 }

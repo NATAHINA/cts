@@ -34,7 +34,7 @@
                         <td><?= esc($it['destination_nom'] ?? '—') ?></td>
                         <td><?= esc($it['duree_heures'] ?? '—') ?></td>
                         <td><?= number_format((float) ($it['prix'] ?? 0), 0, ',', ' ') ?></td>
-                        <td><div><?= esc($it['fournisseur'] ?? '—') ?></div><small class="text-secondary">A <?= esc($it['prix_adulte'] ?? '—') ?> · E <?= esc($it['prix_enfant'] ?? '—') ?> · G <?= esc($it['prix_groupe'] ?? '—') ?></small></td>
+                        <td><div><?= esc($it['fournisseur_nom'] ?? '—') ?></div><small class="text-secondary">Ad: <?= esc($it['prix_adulte'] ?? '—') ?> · Enf: <?= esc($it['prix_enfant'] ?? '—') ?> · Grp: <?= esc($it['prix_groupe'] ?? '—') ?></small></td>
                         <td><span class="badge rounded-pill <?= ($it['disponibilite'] ?? 'disponible') === 'disponible' ? 'lc-badge-actif' : 'lc-badge-inactif' ?>"><?= esc($it['disponibilite'] ?? 'disponible') ?></span></td>
                         <td><span class="badge rounded-pill <?= $it['statut'] === 'actif' ? 'lc-badge-actif' : 'lc-badge-inactif' ?>"><?= esc($it['statut']) ?></span></td>
                         <td class="text-end">

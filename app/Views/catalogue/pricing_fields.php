@@ -1,6 +1,44 @@
 <div class="col-md-6 mb-3">
-    <label class="form-label">Fournisseur</label>
-    <input type="text" class="form-control" name="fournisseur" value="<?= esc(old('fournisseur', $item['fournisseur'] ?? '')) ?>">
+    <label class="form-label">
+        Fournisseur
+    </label>
+
+    <div class="input-group">
+        <select
+            class="form-select"
+            name="fournisseur_id"
+            id="fournisseur_id"
+        >
+            <option value="">
+                — Sélectionner un fournisseur —
+            </option>
+
+            <?php foreach ($fournisseurs as $fournisseur): ?>
+                <option
+                    value="<?= $fournisseur['id'] ?>"
+                    <?= ((int) ($item['fournisseur_id'] ?? 0) === (int) $fournisseur['id'])
+                        ? 'selected'
+                        : '' ?>
+                >
+                    <?= esc($fournisseur['nom']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+
+        <a
+            href="<?= site_url('fournisseurs/new') ?>"
+            class="btn btn-outline-primary"
+            title="Créer un nouveau fournisseur"
+        >
+            <i class="bi bi-plus-lg"></i>
+            Nouveau
+        </a>
+    </div>
+
+    <div class="form-text">
+        Le fournisseur n'existe pas ?
+        Cliquez sur « Nouveau » pour l'ajouter.
+    </div>
 </div>
 <div class="col-md-6 mb-3">
     <label class="form-label">Disponibilité</label>

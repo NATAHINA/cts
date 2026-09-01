@@ -4,80 +4,176 @@ namespace App\Controllers;
 
 use App\Models\ClientModel;
 
-class ClientController extends BaseController
+class ClientController extends BaseCrudController
 {
+    protected string $viewPath = 'clients';
+    protected string $moduleTitle = 'Clients';
+
+    protected $clientModel;
+
+    public function __construct()
+    {
+        $this->clientModel = new ClientModel();
+    }
+
     public function index()
     {
-        $model = new ClientModel();
-        $data = [
-            'title' => 'Clients',
-            'items' => $model->orderBy('clients.created_at', 'DESC')->findAll(),
-        ];
+        $clients = $this->clientModel
+            // ->where('tenant_id', session('tenant_id'))
+            ->orderBy('id', 'DESC')
+            ->findAll();
 
-        return view('clients/index', $data);
+        return view('clients/index', [
+            'title'   => $this->moduleTitle,
+            'clients' => $clients,
+        ]);
     }
 
     public function create()
     {
-        $data = ['title' => 'Ajouter — Clients', 'item' => null];
-
-
-        return view('clients/form', $data);
+        return view('clients/form', [
+            'title'  => 'Nouveau client',
+            'client' => null,
+        ]);
     }
 
-    public function store()
+    
+    public function store(){
+
+        $data = $this->request->getPost();
+
+        unset($data['tenant_id']);
+
+        if (! $this->clientModel->save($data)) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('errors', $this->clientModel->errors());
+        }
+
+        return redirect()
+            ->to(site_url('clients'))
+            ->with('success', 'Client ajouté avec succès.');
+    }
+
+
+    public function show($id)
     {
-        $model = new ClientModel();
+        $client = $this->clientModel
+            ->where('tenant_id', session('tenant_id'))
+            ->find($id);
 
-        $model->insert([
-            'tenant_id' => session('tenant_id'),
-            'type' => $this->request->getPost('type'),
-            'nom' => $this->request->getPost('nom'),
-            'email' => $this->request->getPost('email'),
-            'telephone' => $this->request->getPost('telephone'),
-            'adresse' => $this->request->getPost('adresse'),
-            'notes' => $this->request->getPost('notes'),
+        if (! $client) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        return view('clients/show', [
+            'title'  => 'Détails du client',
+            'client' => $client,
         ]);
-
-        return redirect()->to('/clients')->with('success', "Enregistré avec succès.");
     }
 
     public function edit($id)
     {
-        $model = new ClientModel();
-        $item  = $model->find($id);
+        $client = $this->clientModel
+            ->where('tenant_id', session('tenant_id'))
+            ->find($id);
 
-        if (! $item) {
-            return redirect()->to('/clients')->with('error', "Élément introuvable.");
+        if (! $client) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
         }
 
-        $data = ['title' => 'Modifier — Clients', 'item' => $item];
-
-
-        return view('clients/form', $data);
+        return view('clients/form', [
+            'title'  => 'Modifier le client',
+            'client' => $client,
+        ]);
     }
 
     public function update($id)
     {
-        $model = new ClientModel();
+        $client = $this->clientModel
+            ->where('tenant_id', session('tenant_id'))
+            ->find($id);
 
-        $model->update($id, [
-            'type' => $this->request->getPost('type'),
-            'nom' => $this->request->getPost('nom'),
-            'email' => $this->request->getPost('email'),
-            'telephone' => $this->request->getPost('telephone'),
-            'adresse' => $this->request->getPost('adresse'),
-            'notes' => $this->request->getPost('notes'),
-        ]);
+        if (! $client) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
 
-        return redirect()->to('/clients')->with('success', "Modifié avec succès.");
+        if (! $this->clientModel->update($id, $this->request->getPost())) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('errors', $this->clientModel->errors());
+        }
+
+        return redirect()
+            ->to(site_url('clients'))
+            ->with('success', 'Client modifié avec succès.');
     }
 
     public function delete($id)
     {
-        $model = new ClientModel();
-        $model->delete($id);
+        $client = $this->clientModel
+            ->where('tenant_id', session('tenant_id'))
+            ->find($id);
 
-        return redirect()->to('/clients')->with('success', "Supprimé avec succès.");
+        if (! $client) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        $this->clientModel->delete($id);
+
+        return redirect()
+            ->to(site_url('clients'))
+            ->with('success', 'Client supprimé avec succès.');
+    }
+
+    public function quickStore(){
+        if (! $this->request->isAJAX()) {
+            return $this->response->setStatusCode(400)->setJSON(['success' => false]);
+        }
+
+        $tenantId = (int) session('tenant_id');
+        $nom = trim((string) $this->request->getPost('nom'));
+
+        if ($nom === '') {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Le nom est obligatoire.',
+            ]);
+        }
+
+        $model = new \App\Models\ClientModel();
+
+        $id = $model->insert([
+            'tenant_id'  => $tenantId,
+            'nom'        => $nom,
+            'type_client' => $this->request->getPost('type_client') ?: null,
+            'prenom'     => $this->request->getPost('prenom') ?: null,
+            'email'      => $this->request->getPost('email') ?: null,
+            'telephone'  => $this->request->getPost('telephone') ?: null,
+            'entreprise' => $this->request->getPost('entreprise') ?: null,
+            'statut'     => 'actif',
+            'nationalite'     => $this->request->getPost('nationalite') ?: null,
+            'ville'     => $this->request->getPost('ville') ?: null,
+            'pays'     => $this->request->getPost('pays') ?: null,
+            'adresse'     => $this->request->getPost('adresse') ?: null,
+        ]);
+
+        if (! $id) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => implode(' ', $model->errors() ?: ['Création impossible.']),
+            ]);
+        }
+
+        $prenom = trim((string) $this->request->getPost('prenom'));
+        $label  = trim($prenom . ' ' . $nom);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'id'      => $id,
+            'label'   => $label,
+        ]);
     }
 }

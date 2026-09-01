@@ -19,7 +19,8 @@ class VolModel extends TenantModel
         'date_arrivee',
         'prix',
         'prix_adulte', 'prix_enfant', 'prix_groupe',
-        'fournisseur', 'disponibilite',
+        'id_fournisseur', 
+        'disponibilite',
         'devise_id',
         'statut',
     ];

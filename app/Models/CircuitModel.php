@@ -16,7 +16,7 @@ class CircuitModel extends TenantModel
         'duree_jours',
         'prix',
         'prix_adulte', 'prix_enfant', 'prix_groupe',
-        'fournisseur', 'disponibilite',
+        'fournisseur_id', 'disponibilite',
         'devise_id',
         'statut',
     ];

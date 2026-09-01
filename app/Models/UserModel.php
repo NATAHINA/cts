@@ -2,30 +2,46 @@
 
 namespace App\Models;
 
-use CodeIgniter\Model;
-
-/**
- * Ce modèle hérite du Model CI4 standard (pas de TenantModel) :
- * lors de la connexion, on ne connaît pas encore le tenant_id en
- * session, il faut donc pouvoir chercher un utilisateur par email
- * sans filtre automatique. Le filtrage par tenant_id se fait alors
- * explicitement là où c'est nécessaire (ex : liste des utilisateurs
- * de l'agence dans ParametreController).
- */
-class UserModel extends Model
+class UserModel extends TenantModel
 {
     protected $table            = 'users';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useTimestamps    = true;
-    protected $allowedFields    = [
-        'tenant_id', 'nom', 'prenom', 'email', 'password_hash',
-        'role', 'statut', 'derniere_connexion',
+
+    protected $allowedFields = [
+        'tenant_id',
+        'role_id',
+        'nom',
+        'prenom',
+        'email',
+        'telephone',
+        'password',
+        'actif',
+        'dernier_login',
     ];
+
+    protected $beforeInsert = ['hashPassword'];
+    protected $beforeUpdate = ['hashPassword'];
 
     public function findByEmail(string $email): ?array
     {
-        return $this->where('email', $email)->first();
+        return $this
+            ->where('email', $email)
+            ->first();
+    }
+
+    protected function hashPassword(array $data)
+    {
+        if (! empty($data['data']['password'])) {
+            $data['data']['password'] = password_hash(
+                $data['data']['password'],
+                PASSWORD_DEFAULT
+            );
+        } else {
+            unset($data['data']['password']);
+        }
+        return $data;
     }
 }

@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use App\Models\TenantAccountModel;
 use App\Models\UserModel;
 use App\Models\PasswordResetModel;
+use \App\Models\RoleModel;
 
 class AuthController extends BaseController
 {
@@ -21,45 +22,80 @@ class AuthController extends BaseController
         return view('auth/login');
     }
 
-    public function attemptLogin()
-    {
+    public function attemptLogin(){
         $rules = [
             'email'    => 'required|valid_email',
             'password' => 'required|min_length[6]',
         ];
 
         if (! $this->validate($rules)) {
-            return redirect()->back()->withInput()->with('error', 'Merci de renseigner un email valide et un mot de passe.');
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'Merci de renseigner un email valide et un mot de passe.'
+                );
         }
+
+        $email    = trim($this->request->getPost('email'));
+        $password = $this->request->getPost('password');
 
         $userModel = new UserModel();
-        $user      = $userModel->findByEmail($this->request->getPost('email'));
 
-        if (! $user || ! password_verify($this->request->getPost('password'), $user['password_hash'])) {
-            return redirect()->back()->withInput()->with('error', 'Identifiants incorrects.');
+        $user = $userModel->findByEmail($email);
+
+        // Vérification utilisateur + mot de passe
+        if (
+            ! $user ||
+            empty($user['password']) ||
+            ! password_verify($password, $user['password'])
+        ) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Identifiants incorrects.');
         }
 
-        if ($user['statut'] !== 'actif') {
-            return redirect()->back()->withInput()->with('error', 'Ce compte utilisateur est désactivé.');
+        // Vérification compte actif
+        if ((int) $user['actif'] !== 1) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Ce compte utilisateur est désactivé.');
         }
 
+        // Récupération de l'agence
         $tenantModel = new TenantAccountModel();
-        $tenant      = $tenantModel->find($user['tenant_id']);
+
+        $tenant = $tenantModel->find($user['tenant_id']);
 
         if (! $tenant || $tenant['statut'] !== 'actif') {
-            return redirect()->back()->withInput()->with('error', 'Ce compte agence est suspendu. Contactez le support.');
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'Ce compte agence est suspendu. Contactez le support.'
+                );
         }
 
-        session()->set([
-            'isLoggedIn'   => true,
-            'user_id'      => $user['id'],
-            'user_nom'     => trim($user['prenom'] . ' ' . $user['nom']),
-            'user_role'    => $user['role'],
-            'tenant_id'    => $tenant['id'],
-            'tenant_nom'   => $tenant['nom_agence'],
+        // Mise à jour de la dernière connexion
+        $userModel->update($user['id'], [
+            'dernier_login' => date('Y-m-d H:i:s'),
         ]);
 
-        $userModel->update($user['id'], ['derniere_connexion' => date('Y-m-d H:i:s')]);
+        // Session
+        session()->set([
+            'isLoggedIn' => true,
+            'user_id'    => $user['id'],
+            'user_nom'   => trim(
+                ($user['prenom'] ?? '') . ' ' . $user['nom']
+            ),
+            'user_role'  => $user['role_id'],
+            'tenant_id'  => $tenant['id'],
+            'tenant_nom' => $tenant['nom_agence'],
+        ]);
 
         return redirect()->to('/');
     }
@@ -95,6 +131,7 @@ class AuthController extends BaseController
 
         $tenantModel = new TenantAccountModel();
         $userModel   = new UserModel();
+        $roleModel = new RoleModel();
 
         $db = \Config\Database::connect();
         $db->transStart();
@@ -114,18 +151,34 @@ class AuthController extends BaseController
             'statut'        => 'actif',
         ]);
 
+        $role = $roleModel
+            ->where('tenant_id', $tenantId)
+            ->where('code', 'admin')
+            ->first();
+
+        if (! $role) {
+            $roleId = $roleModel->insert([
+                'tenant_id'   => $tenantId,
+                'code'        => 'admin',
+                'libelle'     => 'Administrateur',
+                'description' => 'Administrateur de l’agence',
+            ]);
+        } else {
+            $roleId = $role['id'];
+        }
+
         if ($tenantId === false) {
             log_message('error', 'Tenant insert failed: ' . json_encode($tenantModel->errors()));
         }
 
         $userId = $userModel->insert([
-            'tenant_id'     => $tenantId,
-            'nom'           => $this->request->getPost('nom'),
-            'prenom'        => $this->request->getPost('prenom'),
-            'email'         => $this->request->getPost('email'),
-            'password_hash' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
-            'role'          => 'admin',
-            'statut'        => 'actif',
+            'tenant_id' => $tenantId,
+            'role_id'   => $roleId,
+            'nom'       => $this->request->getPost('nom'),
+            'prenom'    => $this->request->getPost('prenom'),
+            'email'     => $this->request->getPost('email'),
+            'password'  => $this->request->getPost('password'),
+            'actif'     => 1,
         ]);
 
         if ($userId === false) {

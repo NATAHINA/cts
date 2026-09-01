@@ -1,0 +1,109 @@
+<?= $this->extend('layouts/main') ?>
+<?= $this->section('content') ?>
+
+<?php
+$statutsClass = [
+    'brouillon'            => 'bg-secondary',
+    'emise'                => 'bg-primary',
+    'partiellement_payee'  => 'bg-warning text-dark',
+    'payee'                => 'bg-success',
+    'annulee'              => 'bg-danger',
+    'en_retard'            => 'bg-danger',
+];
+$statutsLabel = [
+    'brouillon'            => 'Brouillon',
+    'emise'                => 'Émise',
+    'partiellement_payee'  => 'Partiellement payée',
+    'payee'                => 'Payée',
+    'annulee'              => 'Annulée',
+    'en_retard'            => 'En retard',
+];
+?>
+
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+        <h4 class="mb-1 fw-bold">Factures</h4>
+        <p class="text-muted mb-0">Suivi de la facturation et des encaissements</p>
+    </div>
+    <a href="<?= site_url('factures/create') ?>" class="btn lc-btn-primary">
+        <i class="bi bi-plus-lg me-1"></i> Nouvelle facture
+    </a>
+</div>
+
+<div class="lc-card p-0">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>N°</th>
+                    <th>Date</th>
+                    <th>Client</th>
+                    <th class="text-end">TTC</th>
+                    <th class="text-end">Payé</th>
+                    <th class="text-end">Restant</th>
+                    <th>Statut</th>
+                    <th class="text-end" style="width:120px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($items)): ?>
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-5">
+                            Aucune facture pour le moment.
+                        </td>
+                    </tr>
+                <?php else: ?>
+                    <?php foreach ($items as $item): ?>
+                        <?php
+                            $client = trim(($item['client_prenom'] ?? '') . ' ' . ($item['client_nom'] ?? ''));
+                            if ($client === '') {
+                                $client = $item['client_entreprise'] ?? '—';
+                            }
+                            $statut = $item['statut'] ?? 'brouillon';
+                        ?>
+                        <tr>
+                            <td>
+                                <a href="<?= site_url('factures/' . $item['id']) ?>" class="fw-semibold text-decoration-none">
+                                    <?= esc($item['numero']) ?>
+                                </a>
+                            </td>
+                            <td>
+                                <?= !empty($item['date_facture'])
+                                    ? date('d/m/Y', strtotime($item['date_facture']))
+                                    : '—' ?>
+                            </td>
+                            <td><?= esc($client) ?></td>
+                            <td class="text-end">
+                                <?= number_format((float)($item['montant_ttc'] ?? 0), 0, ',', ' ') ?>
+                                <small class="text-muted"><?= esc($item['devise'] ?? '') ?></small>
+                            </td>
+                            <td class="text-end text-success">
+                                <?= number_format((float)($item['montant_paye'] ?? 0), 0, ',', ' ') ?>
+                            </td>
+                            <td class="text-end <?= ((float)($item['montant_restant'] ?? 0) > 0) ? 'text-danger fw-semibold' : '' ?>">
+                                <?= number_format((float)($item['montant_restant'] ?? 0), 0, ',', ' ') ?>
+                            </td>
+                            <td>
+                                <span class="badge <?= $statutsClass[$statut] ?? 'bg-secondary' ?>">
+                                    <?= esc($statutsLabel[$statut] ?? $statut) ?>
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <a href="<?= site_url('factures/' . $item['id']) ?>"
+                                   class="btn btn-sm btn-light border" title="Voir">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="<?= site_url('factures/' . $item['id'] . '/print') ?>"
+                                   class="btn btn-sm btn-light border" title="Imprimer" target="_blank">
+                                    <i class="bi bi-printer"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<?= $this->endSection() ?>

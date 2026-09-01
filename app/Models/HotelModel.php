@@ -12,13 +12,16 @@ class HotelModel extends TenantModel
     protected $allowedFields    = [
         'tenant_id',
         'destination_id',
+        'fournisseur_id',
         'nom',
         'categorie',
         'adresse',
         'description',
         'prix_nuit',
-        'prix_adulte', 'prix_enfant', 'prix_groupe',
-        'fournisseur', 'disponibilite',
+        'prix_adulte', 
+        'prix_enfant', 
+        'prix_groupe',
+        'disponibilite',
         'devise_id',
         'statut',
     ];
