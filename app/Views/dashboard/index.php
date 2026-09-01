@@ -581,7 +581,7 @@
                 </div>
 
                 <a href="<?= site_url('cotations') ?>"
-                   class="btn btn-sm btn-light">
+                   class="btn btn-sm btn-light border">
                     Voir tout
                 </a>
 
@@ -717,7 +717,7 @@
                 </div>
 
                 <a href="<?= site_url('reservations') ?>"
-                   class="btn btn-sm btn-light">
+                   class="btn btn-sm btn-light border">
                     Voir tout
                 </a>
 

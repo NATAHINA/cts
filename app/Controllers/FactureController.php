@@ -15,7 +15,7 @@ class FactureController extends BaseController
         return (int) session('tenant_id');
     }
 
-        private function buildCatalogue(): array{
+    private function buildCatalogue(): array{
         $serviceModels = [
             'hotel'      => \App\Models\HotelModel::class,
             'vol'        => \App\Models\VolModel::class,
@@ -90,7 +90,7 @@ class FactureController extends BaseController
             ')
             ->join('clients', 'clients.id = factures.client_id', 'left')
             ->where('factures.tenant_id', $this->tenantId())
-            ->orderBy('factures.date_facture', 'DESC')
+            ->orderBy('factures.id', 'DESC')
             ->findAll();
 
         return view('factures/index', [
@@ -159,6 +159,8 @@ class FactureController extends BaseController
         $model = new FactureModel();
         $ligneModel = new FactureLigneModel();
         $paiementModel = new PaiementModel();
+        $deviseModel   = new \App\Models\DeviseModel();
+        $tenantId      = $this->tenantId();
 
         $facture = $model
             ->select('
@@ -180,6 +182,28 @@ class FactureController extends BaseController
 
         $catalogue = $this->buildCatalogue();
 
+        $deviseFacture = $facture['devise'] ?? 'MGA';
+
+        $devises = $deviseModel
+            ->where('tenant_id', $tenantId)
+            ->orderBy('is_default', 'DESC')
+            ->findAll();
+
+        $totauxParDevise = [];
+
+        foreach ($devises as $d) {
+            $code = $d['code'];
+
+            $totauxParDevise[$code] = [
+                'symbole'          => $d['symbole'] ?? $code,
+                'montant_ht'       => $deviseModel->convertir((float)($facture['montant_ht'] ?? 0), $deviseFacture, $code, $tenantId),
+                'montant_tva'      => $deviseModel->convertir((float)($facture['montant_tva'] ?? 0), $deviseFacture, $code, $tenantId),
+                'montant_ttc'      => $deviseModel->convertir((float)($facture['montant_ttc'] ?? 0), $deviseFacture, $code, $tenantId),
+                'montant_paye'     => $deviseModel->convertir((float)($facture['montant_paye'] ?? 0), $deviseFacture, $code, $tenantId),
+                'montant_restant'  => $deviseModel->convertir((float)($facture['montant_restant'] ?? 0), $deviseFacture, $code, $tenantId),
+            ];
+        }
+
         return view('factures/show', [
             'title'     => 'Facture ' . $facture['numero'],
             'facture'   => $facture,
@@ -193,6 +217,8 @@ class FactureController extends BaseController
                 ->orderBy('date_paiement', 'DESC')
                 ->findAll(),
             'catalogue' => $catalogue,
+            'totauxParDevise' => $totauxParDevise,
+            'deviseFacture'   => $deviseFacture,
         ]);
     }
 
@@ -421,6 +447,9 @@ class FactureController extends BaseController
     {
         $model = new FactureModel();
         $ligneModel = new FactureLigneModel();
+        $deviseModel = new \App\Models\DeviseModel();
+
+        $tenantId    = (int) session('tenant_id');
 
         $facture = $model
             ->select('
@@ -441,10 +470,35 @@ class FactureController extends BaseController
             return redirect()->to(site_url('factures'))->with('error', 'Facture introuvable.');
         }
 
+        $deviseFacture = $facture['devise'] ?? 'MGA';
+
+        $devises = $deviseModel
+            ->where('tenant_id', $tenantId)
+            ->where('actif', 1)
+            ->orderBy('is_default', 'DESC')
+            ->findAll();
+
+        $totauxParDevise = [];
+
+        foreach ($devises as $d) {
+            $code = $d['code'];
+
+            $totauxParDevise[$code] = [
+                'symbole'     => $d['symbole'] ?? $code,
+                'montant_ttc' => $deviseModel->convertir(
+                    (float)($facture['montant_ttc'] ?? 0),
+                    $deviseFacture,
+                    $code,
+                    $tenantId
+                ),
+            ];
+        }
+
         return view('factures/print', [
             'title'   => 'Facture ' . $facture['numero'],
             'facture' => $facture,
             'lignes'  => $ligneModel->where('facture_id', $id)->orderBy('ordre')->findAll(),
+            'totauxParDevise' => $totauxParDevise,
         ]);
     }
 }

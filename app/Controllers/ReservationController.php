@@ -318,6 +318,9 @@ class ReservationController extends BaseController
      */
     public function show($id)
     {
+        $deviseModel = new \App\Models\DeviseModel();
+        $tenantId    = $this->tenantId();
+
         $reservation = $this->model
             ->select('
                 reservations.*,
@@ -384,20 +387,42 @@ class ReservationController extends BaseController
             )
             ->orderBy('id', 'DESC')
             ->first();
+            
+        $deviseReservation = $reservation['devise'] ?? 'MGA';
+
+        $devises = $deviseModel
+            ->where('tenant_id', $tenantId)
+            ->orderBy('is_default', 'DESC')
+            ->findAll();
+
+        $totauxParDevise = [];
+
+        foreach ($devises as $d) {
+            $code = $d['code'];
+
+            $totauxParDevise[$code] = [
+                'symbole'       => $d['symbole'] ?? $code,
+                'montant_total' => $deviseModel->convertir(
+                    (float)($reservation['montant_total'] ?? 0),
+                    $deviseReservation,
+                    $code,
+                    $tenantId
+                ),
+            ];
+        }
 
         return view('reservations/show', [
             'title' =>
                 'Réservation ' .
                 $reservation['numero'],
-
             'reservation' =>
                 $reservation,
-
             'lignes' =>
                 $lignes,
-
             'factureExistante' =>
                 $factureExistante,
+            'totauxParDevise'    => $totauxParDevise,
+            'deviseReservation'  => $deviseReservation,
         ]);
     }
 

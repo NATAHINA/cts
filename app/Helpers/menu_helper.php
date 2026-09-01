@@ -176,6 +176,13 @@ if (! function_exists('get_app_menu')) {
                 'url'   => 'assurances',
                 'match' => ['assurances'],
             ],
+            [
+                'type'  => 'link',
+                'label' => 'Devises',
+                'icon'  => 'bi-currency-exchange',
+                'url'   => 'devises',
+                'match' => ['devises'],
+            ],
 
             // ── Configuration ────────────────────────────────
             [

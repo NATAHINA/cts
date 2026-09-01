@@ -150,6 +150,9 @@ class CotationController extends BaseController
 {
     $model = new CotationModel();
     $reservationModel = new ReservationModel();
+    $deviseModel = new \App\Models\DeviseModel();
+
+    $tenantId    = (int) session('tenant_id');
 
     $cotation = $model
         ->select('
@@ -231,6 +234,42 @@ class CotationController extends BaseController
         ->where('cotation_id', $id)
         ->first();
 
+    $deviseCotation = $cotation['devise'] ?? 'MGA';
+
+    $devises = $deviseModel
+        ->where('tenant_id', $tenantId)
+        ->where('actif', 1)
+        ->orderBy('is_default', 'DESC')
+        ->findAll();
+
+    $totauxParDevise = [];
+
+    foreach ($devises as $d) {
+        $code = $d['code'];
+
+        $totauxParDevise[$code] = [
+            'symbole'    => $d['symbole'] ?? $code,
+            'cout_total' => $deviseModel->convertir(
+                (float)($cotation['cout_total'] ?? 0),
+                $deviseCotation,
+                $code,
+                $tenantId
+            ),
+            'prix_total' => $deviseModel->convertir(
+                (float)($cotation['prix_total'] ?? 0),
+                $deviseCotation,
+                $code,
+                $tenantId
+            ),
+            'marge' => $deviseModel->convertir(
+                (float)($cotation['marge_montant'] ?? 0),
+                $deviseCotation,
+                $code,
+                $tenantId
+            ),
+        ];
+    }
+
     return view('cotations/show', [
         'title'                 => 'Cotation ' . $cotation['numero'],
         'cotation'              => $cotation,
@@ -240,12 +279,17 @@ class CotationController extends BaseController
             ->findAll(),
         'catalogue'             => $catalogue,
         'reservationExistante'  => $reservationExistante,
+        'totauxParDevise' => $totauxParDevise,
+        'deviseCotation'  => $deviseCotation,
     ]);
 }
 
     public function print($id){
         $model      = new CotationModel();
         $ligneModel = new CotationLigneModel();
+        $deviseModel = new \App\Models\DeviseModel();
+
+        $tenantId    = (int) session('tenant_id');
 
         $cotation = $model
             ->select('
@@ -267,6 +311,42 @@ class CotationController extends BaseController
                 ->with('error', 'Cotation introuvable.');
         }
 
+        $deviseCotation = $cotation['devise'] ?? 'MGA';
+
+        $devises = $deviseModel
+            ->where('tenant_id', $tenantId)
+            ->where('actif', 1)
+            ->orderBy('is_default', 'DESC')
+            ->findAll();
+
+        $totauxParDevise = [];
+
+        foreach ($devises as $d) {
+            $code = $d['code'];
+
+            $totauxParDevise[$code] = [
+                'symbole'    => $d['symbole'] ?? $code,
+                'cout_total' => $deviseModel->convertir(
+                    (float)($cotation['cout_total'] ?? 0),
+                    $deviseCotation,
+                    $code,
+                    $tenantId
+                ),
+                'prix_total' => $deviseModel->convertir(
+                    (float)($cotation['prix_total'] ?? 0),
+                    $deviseCotation,
+                    $code,
+                    $tenantId
+                ),
+                'marge' => $deviseModel->convertir(
+                    (float)($cotation['marge_montant'] ?? 0),
+                    $deviseCotation,
+                    $code,
+                    $tenantId
+                ),
+            ];
+        }
+
         return view('cotations/print', [
             'title'    => 'Cotation ' . $cotation['numero'],
             'cotation' => $cotation,
@@ -275,6 +355,8 @@ class CotationController extends BaseController
                 ->where('cotation_id', $id)
                 ->orderBy('ordre', 'ASC')
                 ->findAll(),
+            'totauxParDevise' => $totauxParDevise,
+            'deviseCotation'  => $deviseCotation,
         ]);
     }
 

@@ -68,7 +68,7 @@ $routes->group('', ['filter' => 'auth'], static function (RouteCollection $route
         'DemandeController::update/$1'
     );
 
-    $routes->get(
+    $routes->post(
         'demandes/(:num)/delete',
         'DemandeController::delete/$1'
     );
@@ -480,20 +480,18 @@ $routes->post('paiements/(:num)/annuler', 'PaiementController::annuler/$1');
         $routes->get('(:num)/delete', 'UtilisateurController::delete/$1');
     });
 
-    // -------------------------------------------------------------
-    // CONFIGURATION DES DEVISES
-    // -------------------------------------------------------------
-
-    $routes->get(
-        'parametres/devises',
-        'ParametresController::devises'
-    );
-
-    $routes->post(
-        'parametres/devises',
-        'ParametresController::storeDevise'
-    );
-
+    // =====================================================
+    // DEVISES
+    // =====================================================
+    $routes->group('devises', ['filter' => 'auth'], function($routes) {
+        $routes->get('/',                    'DeviseController::index');
+        $routes->get('new',                  'DeviseController::new');
+        $routes->post('/',                   'DeviseController::create');
+        $routes->get('(:num)/edit',          'DeviseController::edit/$1');
+        $routes->post('(:num)',              'DeviseController::update/$1');
+        $routes->post('(:num)/delete',       'DeviseController::delete/$1');
+        $routes->post('(:num)/set-default',  'DeviseController::setDefault/$1');
+    });
 
     // -------------------------------------------------------------
     // TAXES

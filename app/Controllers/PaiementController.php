@@ -33,7 +33,7 @@ class PaiementController extends BaseController
             ->join('factures', 'factures.id = paiements.facture_id', 'left')
             ->join('clients', 'clients.id = paiements.client_id', 'left')
             ->where('paiements.tenant_id', $this->tenantId())
-            ->orderBy('paiements.date_paiement', 'DESC')
+            ->orderBy('paiements.id', 'DESC')
             ->findAll();
 
         return view('paiements/index', [

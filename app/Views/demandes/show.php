@@ -80,15 +80,13 @@
             <?php endif; ?>
 
             <?php if (in_array($statut, ['nouvelle', 'abandonnée', 'abandonnee'], true)): ?>
-                <form method="post"
-                    action="<?= site_url('demandes/' . $demande['id'] . '/delete') ?>"
-                    class="d-inline"
-                    onsubmit="return confirm('Supprimer définitivement cette demande ?');">
-                    <?= csrf_field() ?>
-                    <button type="submit" class="btn btn-outline-danger">
-                        <i class="bi bi-trash me-1"></i> Supprimer
-                    </button>
-                </form>
+                <button type="button"
+                        class="btn btn-outline-danger"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalSupprimerDemande">
+                    <i class="bi bi-trash me-1"></i>
+                    Supprimer
+                </button>
             <?php endif; ?>
         <?php endif; ?>
     </div>
@@ -306,7 +304,7 @@
 <!-- RÉCAPITULATIF MONTANTS -->
 <div class="border rounded-3 p-3 mt-4 bg-light">
     <div class="row g-3 align-items-center">
-
+                
         <div class="col-md-3">
             <small class="text-muted d-block">Coût total</small>
             <div class="fw-bold">
@@ -342,7 +340,6 @@
                 <span class="fs-6 text-muted"><?= esc($devise) ?></span>
             </div>
         </div>
-
     </div>
 
     <?php if ($budget !== null && $budget > 0): ?>
@@ -367,6 +364,69 @@
         </div>
     <?php endif; ?>
 </div>
+
+<!-- =====================================================
+     ÉQUIVALENTS DANS LES AUTRES DEVISES
+===================================================== -->
+<?php if (!empty($totauxParDevise)): ?>
+    <div class="border rounded-3 p-3 mt-3">
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <i class="bi bi-currency-exchange" style="color:var(--lc-accent);"></i>
+            <h6 class="mb-0 fw-bold">Équivalent dans les autres devises</h6>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Devise</th>
+                        <th class="text-end">Coût total</th>
+                        <th class="text-end">Marge</th>
+                        <th class="text-end">Total prestations</th>
+                        <th class="text-end">Prix proposé</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($totauxParDevise as $code => $t): ?>
+                        <?php
+                            // On met en évidence la devise de la demande
+                            $isCurrent = ($code === ($deviseDemande ?? $devise ?? 'MGA'));
+                        ?>
+                        <tr class="<?= $isCurrent ? 'table-primary' : '' ?>">
+                            <td>
+                                <span class="fw-semibold"><?= esc($code) ?></span>
+                                <small class="text-muted"><?= esc($t['symbole'] ?? '') ?></small>
+                                <?php if ($isCurrent): ?>
+                                    <span class="badge bg-primary ms-1">Actuelle</span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="text-end">
+                                <?= number_format((float)($t['total_cout'] ?? 0), 2, ',', ' ') ?>
+                            </td>
+                            <td class="text-end">
+                                <?= number_format((float)($t['total_marge'] ?? 0), 2, ',', ' ') ?>
+                            </td>
+                            <td class="text-end">
+                                <?= number_format((float)($t['total_prix'] ?? 0), 2, ',', ' ') ?>
+                            </td>
+                            <td class="text-end fw-semibold">
+                                <?= number_format((float)($t['prix_affiche'] ?? 0), 2, ',', ' ') ?>
+                                <small class="text-muted"><?= esc($t['symbole'] ?? $code) ?></small>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="form-text mt-2">
+            Les montants sont convertis à partir de la devise de la demande
+            (<strong><?= esc($deviseDemande ?? $devise ?? 'MGA') ?></strong>)
+            avec les taux enregistrés dans les paramètres.
+        </div>
+    </div>
+<?php endif; ?>
+
 
 
 <?php if ($canEditLignes): ?>
@@ -629,6 +689,50 @@
     </div>
 </div>
 
+<!-- =========================================================
+     MODAL CONFIRMATION SUPPRESSION DEMANDE
+========================================================= -->
+<div class="modal fade" id="modalSupprimerDemande" tabindex="-1" aria-labelledby="modalSupprimerDemandeLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title text-danger" id="modalSupprimerDemandeLabel">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Supprimer la demande
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="mb-2">
+                    Voulez-vous vraiment supprimer définitivement la demande
+                    <strong><?= esc($demande['numero'] ?? '') ?></strong> ?
+                </p>
+                <p class="text-muted small mb-0">
+                    Cette action est irréversible. Toutes les informations liées à cette demande seront perdues.
+                </p>
+            </div>
+
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light border" data-bs-dismiss="modal">
+                    Annuler
+                </button>
+
+                <form method="post"
+                      action="<?= site_url('demandes/' . $demande['id'] . '/delete') ?>"
+                      class="d-inline">
+                    <?= csrf_field() ?>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>
+                        Oui, supprimer
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 <?php if ($canEditLignes && !empty($catalogue)): ?>
 <script>

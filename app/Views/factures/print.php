@@ -170,6 +170,26 @@ if ($clientNom === '') {
                     <span><?= number_format((float)($facture['montant_restant'] ?? 0), 2, ',', ' ') ?> <?= esc($devise) ?></span>
                 </div>
             <?php endif; ?>
+
+            <?php if (!empty($totauxParDevise)): ?>
+            <div style="margin-top: 16px; padding-top: 12px; border-top: 1px dashed #ccc;">
+                <div style="font-size: 11px; font-weight: 700; color: #687083; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .04em;">
+                    Équivalent dans les autres devises
+                </div>
+
+                <?php foreach ($totauxParDevise as $code => $t): ?>
+                    <?php if ($code === $devise) continue; ?>
+
+                    <div class="row" style="font-size: 13px; padding: 3px 0;">
+                        <span style="color:#687083;"><?= esc($code) ?></span>
+                        <span style="font-weight: 600;">
+                            <?= number_format((float)($t['montant_ttc'] ?? 0), 2, ',', ' ') ?>
+                            <?= esc($t['symbole'] ?? $code) ?>
+                        </span>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
         </div>
 
         <?php if (!empty($facture['notes_client'])): ?>

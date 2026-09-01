@@ -53,11 +53,11 @@ $canPay  = ! in_array($statut, ['brouillon', 'annulee', 'payee'], true)
             <i class="bi bi-arrow-left me-1"></i> Retour
         </a>
         <a href="<?= site_url('factures/' . $facture['id'] . '/print') ?>"
-           class="btn btn-light border" target="_blank">
+           class="btn btn-primary border" target="_blank">
             <i class="bi bi-printer me-1"></i> Imprimer
         </a>
         <?php if ($canEdit): ?>
-            <a href="<?= site_url('factures/' . $facture['id'] . '/edit') ?>" class="btn btn-light border">
+            <a href="<?= site_url('factures/' . $facture['id'] . '/edit') ?>" class="btn btn-info border">
                 <i class="bi bi-pencil-square me-1"></i> Modifier
             </a>
         <?php endif; ?>
@@ -372,6 +372,7 @@ $canPay  = ! in_array($statut, ['brouillon', 'annulee', 'payee'], true)
     </div>
 
     <!-- Colonne droite — montants -->
+
     <div class="col-lg-4">
         <div class="lc-card p-4 position-sticky" style="top:20px;">
             <h6 class="fw-bold mb-4"><i class="bi bi-calculator me-2"></i>Montants</h6>
@@ -404,7 +405,7 @@ $canPay  = ! in_array($statut, ['brouillon', 'annulee', 'payee'], true)
                     <?= number_format((float)($facture['montant_paye'] ?? 0), 2, ',', ' ') ?>
                 </span>
             </div>
-            <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-between mb-3">
                 <span class="<?= ((float)($facture['montant_restant'] ?? 0) > 0) ? 'text-danger' : 'text-muted' ?>">
                     Restant dû
                 </span>
@@ -413,6 +414,26 @@ $canPay  = ! in_array($statut, ['brouillon', 'annulee', 'payee'], true)
                     <?= esc($devise) ?>
                 </span>
             </div>
+
+            <!-- Équivalents autres devises -->
+            <?php if (!empty($totauxParDevise)): ?>
+                <div class="border-top pt-3">
+                    <div class="text-muted small mb-2">
+                        <i class="bi bi-currency-exchange me-1"></i>
+                        Équivalent TTC
+                    </div>
+                    <?php foreach ($totauxParDevise as $code => $t): ?>
+                        <?php if ($code === ($deviseFacture ?? $devise)) continue; ?>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted"><?= esc($code) ?></span>
+                            <span class="fw-semibold">
+                                <?= number_format((float)$t['montant_ttc'], 2, ',', ' ') ?>
+                                <?= esc($t['symbole']) ?>
+                            </span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>

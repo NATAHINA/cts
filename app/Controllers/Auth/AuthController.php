@@ -7,6 +7,7 @@ use App\Models\TenantAccountModel;
 use App\Models\UserModel;
 use App\Models\PasswordResetModel;
 use \App\Models\RoleModel;
+use \App\Models\DeviseModel;
 
 class AuthController extends BaseController
 {
@@ -132,6 +133,7 @@ class AuthController extends BaseController
         $tenantModel = new TenantAccountModel();
         $userModel   = new UserModel();
         $roleModel = new RoleModel();
+        $deviseModel = new DeviseModel();
 
         $db = \Config\Database::connect();
         $db->transStart();
@@ -183,6 +185,19 @@ class AuthController extends BaseController
 
         if ($userId === false) {
             log_message('error', 'User insert failed: ' . json_encode($userModel->errors()));
+        }
+
+        // Insert devise
+        $devises = [
+            ['tenant_id' => $tenantId, 'code' => 'MGA', 'nom' => 'Ariary',     'symbole' => 'Ar', 'taux_change' => 1,    'is_default' => 1],
+            ['tenant_id' => $tenantId, 'code' => 'EUR', 'nom' => 'Euro',       'symbole' => '€',  'taux_change' => 4800, 'is_default' => 0],
+            ['tenant_id' => $tenantId, 'code' => 'USD', 'nom' => 'Dollar US',  'symbole' => '$',  'taux_change' => 4500, 'is_default' => 0],
+        ];
+
+        $deviseId = $deviseModel->insert($devises);
+
+        if ($deviseId === false) {
+            log_message('error', 'Devise insert failed: ' . json_encode($deviseModel->errors()));
         }
 
         $db->transComplete();

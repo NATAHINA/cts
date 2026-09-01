@@ -369,7 +369,7 @@
                                 </th>
 
 
-                                <th class="text-end">
+                                <th colspan="3">
 
                                     <?= number_format(
                                         (float) ($cotation['cout_total'] ?? 0),
@@ -384,13 +384,7 @@
 
                                 </th>
 
-
-                                <th></th>
-
-                                <th></th>
-
-
-                                <th class="text-end fs-6">
+                                <th colspan="2" class="text-end">
 
                                     <?= number_format(
                                         (float) ($cotation['prix_total'] ?? 0),
@@ -431,7 +425,7 @@
 
 
         <?php
-        $devise = $cotation['devise'] ?? 'EUR';
+        $devise      = $cotation['devise'] ?? 'MGA';
         $coutTotal   = (float) ($cotation['cout_total'] ?? 0);
         $margeMontant = (float) ($cotation['marge_montant'] ?? 0);
         $margePct    = (float) ($cotation['marge_pourcentage'] ?? 0);
@@ -492,6 +486,28 @@
                 </span>
             </div>
             <?php endif; ?>
+
+            <?php if (!empty($totauxParDevise)): ?>
+            <div class="border-top pt-3">
+                <div class="text-muted small mb-2">
+                    <i class="bi bi-currency-exchange me-1"></i>
+                    Équivalent dans les autres devises
+                </div>
+
+                <?php foreach ($totauxParDevise as $code => $t): ?>
+                    <?php if ($code === $devise) continue; ?>
+
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted"><?= esc($code) ?></span>
+                        <span class="fw-semibold">
+                            <?= number_format($t['prix_total'], 2, ',', ' ') ?>
+                            <?= esc($t['symbole']) ?>
+                        </span>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+
         </div>
 
 
@@ -501,17 +517,17 @@
                 Voyageurs
             </h6>
 
-            <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-between mb-2">
                 <span>Adultes</span>
                 <strong><?= (int) $cotation['nb_adultes'] ?></strong>
             </div>
 
-            <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-between mb-2">
                 <span>Enfants</span>
                 <strong><?= (int) $cotation['nb_enfants'] ?></strong>
             </div>
 
-            <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-between mb-2">
                 <span>Bébés</span>
                 <strong><?= (int) $cotation['nb_bebes'] ?></strong>
             </div>

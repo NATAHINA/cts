@@ -329,32 +329,37 @@ $statutClass = match ($statut) {
     <div class="col-lg-4 col-md-6">
 
         <div class="lc-card p-4 mb-3">
-
-            <h6 class="mb-3">
-                Récapitulatif financier
-            </h6>
+            <h6 class="mb-3">Récapitulatif financier</h6>
 
             <div class="d-flex justify-content-between align-items-center mb-3">
-
-                <span class="text-muted">
-                    Montant total
-                </span>
-
+                <span class="text-muted">Montant total</span>
                 <strong class="fs-5">
-
-                    <?= number_format(
-                        (float) ($reservation['montant_total'] ?? 0),
-                        0,
-                        ',',
-                        ' '
-                    ) ?>
-
+                    <?= number_format((float)($reservation['montant_total'] ?? 0), 0, ',', ' ') ?>
                     <?= esc($reservation['devise'] ?? '') ?>
-
                 </strong>
             </div>
 
-            <?php if (! empty($factureExistante)): ?>
+            <!-- Équivalents autres devises -->
+            <?php if (!empty($totauxParDevise)): ?>
+                <div class="border-top pt-3 mb-3">
+                    <div class="text-muted small mb-2">
+                        <i class="bi bi-currency-exchange me-1"></i>
+                        Équivalent
+                    </div>
+                    <?php foreach ($totauxParDevise as $code => $t): ?>
+                        <?php if ($code === ($deviseReservation ?? $reservation['devise'] ?? '')) continue; ?>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted"><?= esc($code) ?></span>
+                            <span class="fw-semibold">
+                                <?= number_format((float)$t['montant_total'], 2, ',', ' ') ?>
+                                <?= esc($t['symbole']) ?>
+                            </span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if (!empty($factureExistante)): ?>
                 <hr>
                 <div class="d-flex justify-content-between align-items-center">
                     <span class="text-muted">Facture</span>
@@ -370,7 +375,6 @@ $statutClass = match ($statut) {
                     </strong>
                 </div>
             <?php endif; ?>
-
         </div>
 
     </div>
@@ -410,44 +414,50 @@ $statutClass = match ($statut) {
                 </div>
 
                 <div>
-                    <?= esc($reservation['created_at'] ?? '—') ?>
+                    <?= esc(date('d/m/Y', strtotime($reservation['created_at']) ?? '-')) ?>
                 </div>
 
             </div>
 
-
-            <?php if (!empty($reservation['notes_client'])): ?>
-
-                <hr>
-
-                <div class="text-muted small mb-1">
-                    Notes client
-                </div>
-
-                <div>
-                    <?= nl2br(esc($reservation['notes_client'])) ?>
-                </div>
-
-            <?php endif; ?>
-
-
-            <?php if (!empty($reservation['notes_interne'])): ?>
-
-                <hr>
-
-                <div class="text-muted small mb-1">
-                    Notes internes
-                </div>
-
-                <div>
-                    <?= nl2br(esc($reservation['notes_interne'])) ?>
-                </div>
-
-            <?php endif; ?>
-
         </div>
 
     </div>
+
+    <?php if (!empty($reservation['notes_client'])): ?>
+    <div class="col-lg-4 col-md-6">
+        <div class="lc-card p-4">
+            <h6 class="mb-3">
+                Notes client
+            </h6>
+
+            <div class="text-muted small mb-1">
+                Indication ajoutée par le client
+            </div>
+
+            <div>
+                <?= nl2br(esc($reservation['notes_client'])) ?>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <?php if (!empty($reservation['notes_interne'])): ?>
+    <div class="col-lg-4 col-md-6">
+        <div class="lc-card p-4">
+            <h6 class="mb-3">
+                Notes interne
+            </h6>
+
+            <div class="text-muted small mb-1">
+                Indication par l'agence ou l'équipe interne
+            </div>
+
+            <div>
+                <?= nl2br(esc($reservation['notes_interne'])) ?>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
 
 </div>
 

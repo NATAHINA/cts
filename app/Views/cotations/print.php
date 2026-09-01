@@ -51,12 +51,12 @@ $numero = $cotation['numero']
         h1 { margin: 0; font-size: 28px; text-align: right; }
         .meta { margin-top: 8px; text-align: right; font-size: 13px; line-height: 1.7; }
         .info { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 30px 0; }
-        .info-block { padding: 15px; background: #f7f8fb; border-left: 3px solid #4c5fd5; }
+        .info-block { padding: 15px; background: #f7f8fb; border-left: 2px solid #4c5fd5; }
         .label {
-            margin-bottom: 6px; color: #687083; font-size: 11px;
+            margin-bottom: 6px; color: #687083; font-size: 12px;
             font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
         }
-        .info-block strong { font-size: 16px; }
+        .info-block strong { font-size: 12px; }
         table { width: 100%; border-collapse: collapse; margin-top: 12px; }
         th {
             padding: 11px 8px; border-bottom: 2px solid #202532;
@@ -67,7 +67,7 @@ $numero = $cotation['numero']
         .total {
             margin-top: 18px; margin-left: auto; width: 280px;
             display: flex; justify-content: space-between;
-            padding: 14px 0; border-top: 2px solid #202532;
+            padding: 8px 0;
             font-size: 17px; font-weight: 700;
         }
         .notes {
@@ -188,23 +188,111 @@ $numero = $cotation['numero']
             </tbody>
         </table>
 
-        <div class="total">
-            <span>Total</span>
-            <span>
-                <?= esc(number_format((float)($cotation['prix_total'] ?? $cotation['montant_total'] ?? 0), 2, ',', ' ')) ?>
-                <?= esc($deviseSymbole) ?>
-            </span>
-        </div>
+        <?php
+            
+            $montantHT      = (float)($cotation['prix_total'] ?? 0);
+            $montantRemise  = (float)($cotation['reduction_montant'] ?? 0);
+            $tauxRemise     = (float)($cotation['reduction_pourcentage'] ?? 0);
+            $montantMarque  = (float)($cotation['marge_montant'] ?? 0);
+            $tauxMarque     = (float)($cotation['marge_pourcentage'] ?? 0);
+            $taxe     = (float)($cotation['taxe_montant'] ?? 0);
+            
+            $netHT      = max(0, $montantHT - $montantRemise);
+            $totalFinal = $netHT + $taxe;
+
+            if ($totalFinal < 0) $totalFinal = 0;
+            ?>
+
+            <div style="margin-top: 24px; margin-left: auto; width: 320px;">
+
+                <div style="display:flex; justify-content:space-between; padding:6px 0; font-size:14px;">
+                    <span>Sous-total</span>
+                    <span>
+                        <?= esc(number_format($montantHT, 2, ',', ' ')) ?>
+                        <?= esc($deviseSymbole) ?>
+                    </span>
+                </div>
+
+                <?php if ($montantRemise > 0 || $tauxRemise > 0): ?>
+                    <div style="display:flex; justify-content:space-between; padding:6px 0; font-size:14px; color:#c0392b;">
+                        <span>
+                            Réduction
+                            <?php if ($tauxRemise > 0): ?>
+                                (<?= esc(number_format($tauxRemise, 1, ',', ' ')) ?> %)
+                            <?php endif; ?>
+                        </span>
+                        <span>
+                            − <?= esc(number_format($montantRemise, 2, ',', ' ')) ?>
+                            <?= esc($deviseSymbole) ?>
+                        </span>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($montantMarque > 0 || $tauxMarque > 0): ?>
+                    <div style="display:flex; justify-content:space-between; padding:6px 0; font-size:13px; color:#687083;">
+                        <span>
+                            Marge
+                            <?php if ($tauxMarque > 0): ?>
+                                (<?= esc(number_format($tauxMarque, 1, ',', ' ')) ?> %)
+                            <?php endif; ?>
+                        </span>
+                        <span>
+                            <?= esc(number_format($montantMarque, 2, ',', ' ')) ?>
+                            <?= esc($deviseSymbole) ?>
+                        </span>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($taxe > 0 ): ?>
+                    <div style="display:flex; justify-content:space-between; padding:6px 0; font-size:13px; color:#687083;">
+                        <span>
+                            Taxe
+                            <?php if ($taxe > 0): ?>
+                                (<?= esc(number_format($taxe, 1, ',', ' ')) ?> %)
+                            <?php endif; ?>
+                        </span>
+                    </div>
+                <?php endif; ?>
+
+                <div class="total" style="margin-top: 8px; padding-top: 10px;">
+                    <span>Total</span>
+                    <span>
+                        <?= esc(number_format($totalFinal, 2, ',', ' ')) ?>
+                        <?= esc($deviseSymbole) ?>
+                    </span>
+                </div>
+
+                <?php if (!empty($totauxParDevise)): ?>
+                <div style="margin-top: 18px; padding-top: 12px; border-top: 1px dashed #ccc;">
+                    <div style="font-size: 12px; font-weight: 700; color: #687083; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .04em;">
+                        Équivalent dans les autres devises
+                    </div>
+
+                    <?php foreach ($totauxParDevise as $code => $t): ?>
+                        <?php if ($code === $deviseCode) continue; ?>
+
+                        <div style="display:flex; justify-content:space-between; padding:4px 0; font-size:13px;">
+                            <span style="color:#687083;"><?= esc($code) ?></span>
+                            <span style="font-weight:600;">
+                                <?= esc(number_format((float)($t['prix_total'] ?? 0), 2, ',', ' ')) ?>
+                                <?= esc($t['symbole'] ?? $code) ?>
+                            </span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
+            </div>
+
 
         <?php if (! empty($cotation['notes_client'])): ?>
-            <div class="notes">
+            <div class="notes du client">
                 <strong>Notes</strong><br>
                 <?= esc($cotation['notes_client']) ?>
             </div>
-        <?php elseif (! empty($cotation['notes'])): ?>
+        <?php elseif (! empty($cotation['notes_interne'])): ?>
             <div class="notes">
-                <strong>Notes</strong><br>
-                <?= esc($cotation['notes']) ?>
+                <strong>Notes interne</strong><br>
+                <?= esc($cotation['notes_interne']) ?>
             </div>
         <?php endif; ?>
     </main>

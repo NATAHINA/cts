@@ -82,6 +82,8 @@ class DemandeController extends BaseController
     }
 
     public function show($id){
+        $deviseModel = new \App\Models\DeviseModel();
+
         $tenantId = $this->tenantId();
 
         $demande = $this->demandeModel
@@ -129,6 +131,48 @@ class DemandeController extends BaseController
             ? (float) $demande['prix_forfait']
             : $totalPrix;
 
+        $deviseDemande = $demande['devise'] ?? 'MGA';
+
+        $devises = $deviseModel
+            ->where('tenant_id', $tenantId)
+            ->where('actif', 1)
+            ->orderBy('is_default', 'DESC')
+            ->findAll();
+
+        $totauxParDevise = [];
+
+        foreach ($devises as $d) {
+            $code = $d['code'];
+
+            $totauxParDevise[$code] = [
+                'symbole'      => $d['symbole'] ?? $code,
+                'prix_affiche' => $deviseModel->convertir(
+                    $prixAffiche,
+                    $deviseDemande,
+                    $code,
+                    $tenantId
+                ),
+                'total_prix'   => $deviseModel->convertir(
+                    $totalPrix,
+                    $deviseDemande,
+                    $code,
+                    $tenantId
+                ),
+                'total_cout'   => $deviseModel->convertir(
+                    $totalCout,
+                    $deviseDemande,
+                    $code,
+                    $tenantId
+                ),
+                'total_marge'  => $deviseModel->convertir(
+                    $totalMarge,
+                    $deviseDemande,
+                    $code,
+                    $tenantId
+                ),
+            ];
+        }
+
         return view('demandes/show', [
             'title'            => 'Détails de la demande',
             'demande'          => $demande,
@@ -139,6 +183,8 @@ class DemandeController extends BaseController
             'totalMarge'       => $totalMarge,
             'margePourcentage' => $margePourcentage,
             'prixAffiche'      => $prixAffiche,
+            'deviseDemande'    => $deviseDemande,
+            'totauxParDevise'  => $totauxParDevise,
         ]);
     }
 
