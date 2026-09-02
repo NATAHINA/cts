@@ -35,7 +35,6 @@
       href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
 
 	<style>
-		#toolbarContainer{display:none;}
 		:root{
 			--lc-accent:       #4C5FD5;
 			--lc-accent-light: #7C89E8;
@@ -595,43 +594,6 @@
 
 		}
 
-		/* ==========================================================
-   SIGNATURE NR CODE
-========================================================== */
-
-.lc-powered-by{
-    position: fixed;
-    right: 10px;
-    bottom: 12px;
-    z-index: 1010;
-    font-size: 10px;
-    font-weight: 500;
-    color: #9a9baa;
-    background: rgba(255,255,255,0.92);
-    border: 1px solid rgba(230,230,238,0.85);
-    padding: 5px 9px;
-    border-radius: 7px;
-    box-shadow: 0 3px 12px rgba(28,30,43,0.06);
-    backdrop-filter: blur(6px);
-    pointer-events: none;
-    user-select: none;
-}
-
-.lc-powered-by strong{
-    color: var(--lc-accent-ink);
-    font-weight: 700;
-}
-
-@media (max-width: 575.98px){
-    .lc-powered-by{
-        right: 10px;
-        bottom: 8px;
-        font-size: 9px;
-        padding: 4px 7px;
-    }
-
-}
-
 	</style>
 
 	<?= $this->renderSection('styles') ?>
@@ -1085,15 +1047,4 @@
 
 
 </body>
-
-<div class="lc-powered-by">
-	Propulsé par <strong>NR CODE</strong> · © <?= date('Y') ?>
-</div>
-
-<?php
-	$currentUri = trim(uri_string(), '/');
-	$userNom = session('user_nom') ?? 'Utilisateur';
-	$tenantNom = session('tenant_nom') ?? 'CPS';
-?>
-
 </html>

@@ -84,6 +84,19 @@
         .password-toggle:hover{
             color: var(--lc-accent);
         }
+        .auth-copyright{
+            text-align:center;
+            font-size:11px;
+            color:#9a9baa;
+            margin-top:22px;
+            padding-top:14px;
+            border-top:1px solid var(--lc-line);
+        }
+
+        .auth-copyright strong{
+            color:var(--lc-accent-ink);
+            font-weight:700;
+        }
     </style>
 </head>
 <body>
@@ -172,6 +185,10 @@
 
                 <div class="auth-foot">
                     Déjà un compte&nbsp;? <a href="<?= site_url('login') ?>">Se connecter</a>
+                </div>
+
+                <div class="auth-copyright">
+                    © <?= date('Y') ?> <strong>NR CODE</strong> — Tous droits réservés.
                 </div>
             </div>
         </div>
