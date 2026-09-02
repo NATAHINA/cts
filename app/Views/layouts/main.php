@@ -28,7 +28,7 @@
 	<link
 		rel="icon"
 		type="image/x-icon"
-		href="https://img.icons8.com/color/48/airplane-take-off.ico"
+		href="https://img.icons8.com/color/48/airplane-take-off.png"
 	>
 	
 	<link rel="stylesheet"
@@ -641,7 +641,10 @@
 <nav class="lc-nav">
 
     <?php
-    $menu = function_exists('get_app_menu') ? get_app_menu() : [];
+    $menu = function_exists('get_filtered_app_menu')
+        ? get_filtered_app_menu()
+        : [];
+
     $currentUri = trim(uri_string(), '/');
     ?>
 
@@ -657,12 +660,21 @@
 
             <?php
             $isActive = false;
+
             foreach ($item['match'] ?? [] as $m) {
+
                 if ($m === '' && $currentUri === '') {
                     $isActive = true;
                     break;
                 }
-                if ($m !== '' && str_starts_with($currentUri, $m)) {
+
+                if (
+                    $m !== '' &&
+                    (
+                        $currentUri === $m ||
+                        str_starts_with($currentUri, $m . '/')
+                    )
+                ) {
                     $isActive = true;
                     break;
                 }
@@ -674,7 +686,10 @@
                 class="lc-nav-link <?= $isActive ? 'active' : '' ?>"
             >
                 <i class="bi <?= esc($item['icon']) ?>"></i>
-                <span><?= esc($item['label']) ?></span>
+
+                <span>
+                    <?= esc($item['label']) ?>
+                </span>
             </a>
 
         <?php endif; ?>
@@ -781,21 +796,14 @@
 
 				</li>
 
-
+				<?php if (can('parametres.view')): ?>
 				<li>
-
-					<a
-						class="dropdown-item"
-						href="<?= site_url('parametres') ?>"
-					>
-
+					<a class="dropdown-item" href="<?= site_url('parametres') ?>">
 						<i class="bi bi-gear me-2"></i>
 						Paramètres
-
 					</a>
-
 				</li>
-
+				<?php endif; ?>
 
 				<li>
 

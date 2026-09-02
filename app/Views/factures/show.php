@@ -52,14 +52,18 @@ $canPay  = ! in_array($statut, ['brouillon', 'annulee', 'payee'], true)
         <a href="<?= site_url('factures') ?>" class="btn btn-light border">
             <i class="bi bi-arrow-left me-1"></i> Retour
         </a>
+        <?php if (can('factures.print')): ?>
         <a href="<?= site_url('factures/' . $facture['id'] . '/print') ?>"
            class="btn btn-primary border" target="_blank">
             <i class="bi bi-printer me-1"></i> Imprimer
         </a>
+        <?php endif; ?>
         <?php if ($canEdit): ?>
-            <a href="<?= site_url('factures/' . $facture['id'] . '/edit') ?>" class="btn btn-info border">
-                <i class="bi bi-pencil-square me-1"></i> Modifier
-            </a>
+            <?php if (can('factures.edit')): ?>
+                <a href="<?= site_url('factures/' . $facture['id'] . '/edit') ?>" class="btn btn-info border">
+                    <i class="bi bi-pencil-square me-1"></i> Modifier
+                </a>
+            <?php endif; ?>
         <?php endif; ?>
     </div>
 </div>
@@ -320,7 +324,8 @@ $canPay  = ! in_array($statut, ['brouillon', 'annulee', 'payee'], true)
                 <p class="text-muted mb-3">Aucun paiement enregistré.</p>
             <?php endif; ?>
 
-            <?php if ($canPay): ?>
+            <?php if (can('paiements.create')): ?>
+                <?php if ($canPay): ?>
                 <hr>
                 <h6 class="fw-bold mb-3">Enregistrer un paiement</h6>
                 <form method="post" action="<?= site_url('paiements') ?>">
@@ -358,6 +363,7 @@ $canPay  = ! in_array($statut, ['brouillon', 'annulee', 'payee'], true)
                         </div>
                     </div>
                 </form>
+                <?php endif; ?>
             <?php endif; ?>
         </div>
 

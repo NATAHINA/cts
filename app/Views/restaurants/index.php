@@ -6,9 +6,11 @@
         <h4 class="mb-1">Restaurants</h4>
         <p class="text-muted mb-0">Catalogue des restaurants partenaires.</p>
     </div>
+    <?php if (can('restaurants.create')): ?>
     <a href="<?= site_url('restaurants/new') ?>" class="btn lc-btn-primary">
         <i class="bi bi-plus-lg me-1"></i> Nouveau restaurant
     </a>
+    <?php endif; ?>
 </div>
 
 <div class="lc-card">
@@ -25,13 +27,7 @@
                 </tr>
             </thead>
             <tbody>
-                <?php if (empty($restaurants)): ?>
-                    <tr>
-                        <td colspan="6" class="text-center text-muted py-5">
-                            Aucun restaurant enregistré.
-                        </td>
-                    </tr>
-                <?php else: ?>
+                <?php if (!empty($restaurants)): ?>
                     <?php foreach ($restaurants as $r): ?>
                         <tr>
                             <td class="fw-semibold"><?= esc($r['nom']) ?></td>
@@ -50,16 +46,20 @@
                             </td>
                             <td class="text-end">
                                 <div class="btn-group">
-                                    <a href="<?= site_url('restaurants/' . $r['id'] . '/edit') ?>"
-                                       class="btn btn-sm btn-light border" title="Modifier">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <a href="<?= site_url('restaurants/' . $r['id'] . '/delete') ?>"
-                                       class="btn btn-sm btn-light border text-danger"
-                                       title="Supprimer"
-                                       onclick="return confirm('Supprimer ce restaurant ?')">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
+                                    <?php if (can('restaurants.edit')): ?>
+                                        <a href="<?= site_url('restaurants/' . $r['id'] . '/edit') ?>"
+                                           class="btn btn-sm btn-light border" title="Modifier">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    <?php endif; ?>
+                                    <?php if (can('restaurants.delete')): ?>
+                                        <a href="<?= site_url('restaurants/' . $r['id'] . '/delete') ?>"
+                                           class="btn btn-sm btn-light border text-danger"
+                                           title="Supprimer"
+                                           onclick="return confirm('Supprimer ce restaurant ?')">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>

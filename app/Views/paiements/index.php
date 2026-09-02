@@ -6,9 +6,11 @@
         <h4 class="mb-1 fw-bold">Paiements</h4>
         <p class="text-muted mb-0">Historique des encaissements</p>
     </div>
+    <?php if (can('factures.view')): ?>
     <a href="<?= site_url('factures') ?>" class="btn btn-light border">
         Voir les factures
     </a>
+    <?php endif; ?>
 </div>
 
 <div class="lc-card p-0">
@@ -26,11 +28,7 @@
                 </tr>
             </thead>
             <tbody>
-                <?php if (empty($items)): ?>
-                    <tr>
-                        <td colspan="7" class="text-center text-muted py-5">Aucun paiement.</td>
-                    </tr>
-                <?php else: ?>
+                <?php if (!empty($items)): ?>
                     <?php foreach ($items as $item): ?>
                         <?php
                             $client = trim(($item['client_prenom'] ?? '') . ' ' . ($item['client_nom'] ?? ''));
@@ -41,9 +39,13 @@
                             <td><?= date('d/m/Y', strtotime($item['date_paiement'])) ?></td>
                             <td>
                                 <?php if (!empty($item['facture_id'])): ?>
+                                    <?php if (can('factures.view')): ?>
                                     <a href="<?= site_url('factures/' . $item['facture_id']) ?>">
                                         <?= esc($item['facture_numero'] ?? '') ?>
                                     </a>
+                                    <?php else: ?>
+                                        <?= esc($item['facture_numero'] ?? '') ?>   
+                                    <?php endif; ?>
                                 <?php else: ?>—<?php endif; ?>
                             </td>
                             <td><?= esc($client ?: '—') ?></td>

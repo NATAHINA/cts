@@ -19,6 +19,8 @@ class CreateRolesAndUsersTables extends Migration
                 'updated_at'  => ['type' => 'DATETIME', 'null' => true],
             ]);
             $this->forge->addKey('id', true);
+            $this->forge->addKey('tenant_id');
+            $this->forge->addUniqueKey(['tenant_id', 'code']);
             $this->forge->createTable('roles', false, ['ENGINE' => 'InnoDB']);
         }
 

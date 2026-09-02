@@ -5,8 +5,9 @@
 <?= $this->include('catalogue/filters') ?>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <div></div>
-    <a href="<?= site_url('circuits/new') ?>" class="btn lc-btn-primary"><i class="bi bi-plus-lg me-1"></i> Ajouter</a>
+    <?php if (can('circuits.create')): ?>
+        <a href="<?= site_url('circuits/new') ?>" class="btn lc-btn-primary"><i class="bi bi-plus-lg me-1"></i> Ajouter</a>
+    <?php endif; ?>
 </div>
 
 <div class="lc-card">
@@ -24,9 +25,7 @@
                 </tr>
             </thead>
             <tbody>
-                <?php if (empty($items)): ?>
-                    <tr><td colspan="7" class="text-secondary text-center py-4">Aucun élément pour le moment.</td></tr>
-                <?php endif; ?>
+                <?php if (!empty($items)): ?>
                 <?php foreach ($items as $it): ?>
                     <tr>
                         <td><?= esc($it['nom'] ?? '—') ?></td>
@@ -36,11 +35,16 @@
                         <td><span class="badge rounded-pill <?= ($it['disponibilite'] ?? 'disponible') === 'disponible' ? 'lc-badge-actif' : 'lc-badge-inactif' ?>"><?= esc($it['disponibilite'] ?? 'disponible') ?></span></td>
                         <td><span class="badge rounded-pill <?= $it['statut'] === 'actif' ? 'lc-badge-actif' : 'lc-badge-inactif' ?>"><?= esc($it['statut']) ?></span></td>
                         <td class="text-end">
+                            <?php if (can('circuits.edit')): ?>
                             <a href="<?= site_url('circuits/' . $it['id'] . '/edit') ?>" class="btn btn-sm btn-light border"><i class="bi bi-pencil"></i></a>
+                            <?php endif; ?>
+                            <?php if (can('circuits.delete')): ?>
                             <a href="<?= site_url('circuits/' . $it['id'] . '/delete') ?>" class="btn btn-sm btn-light border text-danger" onclick="return confirm('Supprimer cet élément ?');"><i class="bi bi-trash"></i></a>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>
+                <?php endif; ?>
             </tbody>
         </table>
     </div>

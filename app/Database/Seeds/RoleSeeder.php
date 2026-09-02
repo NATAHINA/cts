@@ -8,6 +8,12 @@ class RoleSeeder extends Seeder
 {
     public function run()
     {
+        $tenants = $this->db
+            ->table('tenants')
+            ->select('id')
+            ->get()
+            ->getResultArray();
+
         $data = [
             [
                 'tenant_id'   => null,          // rôle global (tous les tenants)
@@ -43,16 +49,25 @@ class RoleSeeder extends Seeder
             ],
         ];
 
-        // Évite les doublons si on relance le seeder
-        foreach ($data as $role) {
-            $exists = $this->db
-                ->table('roles')
-                ->where('code', $role['code'])
-                ->where('tenant_id', null)
-                ->countAllResults();
+        foreach ($tenants as $tenant) {
+            foreach ($roles as $role) {
+                $exists = $this->db
+                    ->table('roles')
+                    ->where('tenant_id', $tenant['id'])
+                    ->where('code', $role['code'])
+                    ->countAllResults();
 
-            if ($exists === 0) {
-                $this->db->table('roles')->insert($role);
+                if ($exists === 0) {
+
+                    $this->db->table('roles')->insert([
+                        'tenant_id'   => $tenant['id'],
+                        'code'        => $role['code'],
+                        'libelle'     => $role['libelle'],
+                        'description' => $role['description'],
+                        'created_at'  => date('Y-m-d H:i:s'),
+                        'updated_at'  => date('Y-m-d H:i:s'),
+                    ]);
+                }
             }
         }
     }

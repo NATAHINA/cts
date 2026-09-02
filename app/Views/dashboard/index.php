@@ -95,6 +95,7 @@
             </div>
         </div>
 
+        <?php if (can('clients.create')): ?>
         <div>
             <a href="<?= site_url('clients/new') ?>" class="btn lc-btn-primary">
                 <i class="bi bi-person-plus"></i>
@@ -102,6 +103,7 @@
             </a>
 
         </div>
+        <?php endif; ?>
 
 
     </div>
@@ -471,7 +473,7 @@
     <div class="card-body">
 
         <div class="row g-3">
-
+            <?php if (can('plannings.create')): ?>
             <div class="col-md-3">
                 <a href="<?= site_url('plannings-depart/new') ?>"
                 class="quick-action">
@@ -487,7 +489,9 @@
                     </small>
                 </a>
             </div>
-
+            <?php endif; ?>
+            
+            <?php if (can('cotations.create')): ?>
             <div class="col-md-3">
 
                 <a href="<?= site_url('cotations/new') ?>"
@@ -502,14 +506,12 @@
                     <small class="text-muted">
                         Créer une proposition
                     </small>
-
                 </a>
-
             </div>
-
-
+            <?php endif; ?>
+            
+            <?php if (can('reservations.create')): ?>
             <div class="col-md-3">
-
                 <a href="<?= site_url('reservations/new') ?>"
                    class="quick-action">
 
@@ -522,14 +524,12 @@
                     <small class="text-muted">
                         Enregistrer un voyage
                     </small>
-
                 </a>
-
             </div>
-
-
+            <?php endif; ?>
+            
+            <?php if (can('factures.create')): ?>
             <div class="col-md-3">
-
                 <a href="<?= site_url('factures/create') ?>"
                    class="quick-action">
 
@@ -542,10 +542,9 @@
                     <small class="text-muted">
                         Créer une facture
                     </small>
-
                 </a>
-
             </div>
+            <?php endif; ?>
 
         </div>
 
@@ -580,10 +579,12 @@
 
                 </div>
 
+                <?php if (can('cotations.view')): ?>
                 <a href="<?= site_url('cotations') ?>"
                    class="btn btn-sm btn-light border">
                     Voir tout
                 </a>
+                <?php endif; ?>
 
             </div>
 
@@ -716,10 +717,12 @@
 
                 </div>
 
-                <a href="<?= site_url('reservations') ?>"
-                   class="btn btn-sm btn-light border">
-                    Voir tout
-                </a>
+                <?php if (can('reservations.view')): ?>
+                    <a href="<?= site_url('reservations') ?>"
+                       class="btn btn-sm btn-light border">
+                        Voir tout
+                    </a>
+                <?php endif; ?>
 
             </div>
 

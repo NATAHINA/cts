@@ -11,10 +11,12 @@
         </p>
     </div>
 
-    <a href="<?= site_url('fournisseurs/new') ?>" class="btn lc-btn-primary">
-        <i class="bi bi-plus-lg"></i>
-        Ajouter
-    </a>
+    <?php if (can('fournisseurs.create')): ?>
+        <a href="<?= site_url('fournisseurs/new') ?>" class="btn lc-btn-primary">
+            <i class="bi bi-plus-lg"></i>
+            Ajouter
+        </a>
+    <?php endif; ?>
 
 </div>
 
@@ -61,11 +63,19 @@
                     </td>
 
                     <td class="text-end">
-
-                        <a href="<?= site_url('fournisseurs/' . $fournisseur['id'] . '/edit') ?>"
-                           class="btn btn-sm btn-light border">
-                            <i class="bi bi-pencil"></i>
-                        </a>
+                        <?php if (can('fournisseurs.edit')): ?>
+                            <a href="<?= site_url('fournisseurs/' . $fournisseur['id'] . '/edit') ?>"
+                               class="btn btn-sm btn-light border">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        <?php endif; ?>
+                        <?php if (can('fournisseurs.delete')): ?>
+                            <a href="<?= site_url('fournisseurs/' . $fournisseur['id'] . '/delete') ?>"
+                               class="btn btn-sm btn-light border text-danger"
+                               onclick="return confirm('Supprimer ce fournisseur ?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        <?php endif; ?>
 
                     </td>
 

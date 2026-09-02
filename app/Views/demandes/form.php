@@ -27,9 +27,11 @@
                             </option>
                         <?php endforeach; ?>
                     </select>
+                    <?php if (can('clients.create')): ?>
                     <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalNouveauClient" title="Nouveau client">
                         <i class="bi bi-plus-lg"></i>
                     </button>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -45,9 +47,11 @@
                             </option>
                         <?php endforeach; ?>
                     </select>
+                    <?php if (can('destinations.create')): ?>
                     <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalNouvelleDestination" title="Nouvelle destination">
                         <i class="bi bi-plus-lg"></i>
                     </button>
+                    <?php endif; ?>
                 </div>
             </div>
 

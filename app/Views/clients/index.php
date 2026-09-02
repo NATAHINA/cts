@@ -11,10 +11,12 @@
         </p>
     </div>
 
-    <a href="<?= site_url('clients/new') ?>" class="btn lc-btn-primary">
-        <i class="bi bi-person-plus me-1"></i>
-        Nouveau client
-    </a>
+    <?php if (can('clients.create')): ?>
+        <a href="<?= site_url('clients/new') ?>" class="btn lc-btn-primary">
+            <i class="bi bi-person-plus me-1"></i>
+            Nouveau client
+        </a>
+    <?php endif; ?>
 
 </div>
 
@@ -60,17 +62,20 @@
                         </td>
 
                         <td class="text-end">
+                            <?php if (can('clients.edit')): ?>
+                                <a href="<?= site_url('clients/' . $client['id'] . '/edit') ?>"
+                                   class="btn btn-sm btn-light border">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            <?php endif; ?>
 
-                            <a href="<?= site_url('clients/' . $client['id'] . '/edit') ?>"
-                               class="btn btn-sm btn-light border">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-
-                            <a href="<?= site_url('clients/' . $client['id'] . '/delete') ?>"
-                               class="btn btn-sm btn-light border text-danger"
-                               onclick="return confirm('Supprimer ce client ?')">
-                                <i class="bi bi-trash"></i>
-                            </a>
+                            <?php if (can('clients.delete')): ?>
+                                <a href="<?= site_url('clients/' . $client['id'] . '/delete') ?>"
+                                   class="btn btn-sm btn-light border text-danger"
+                                   onclick="return confirm('Supprimer ce client ?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            <?php endif; ?>
 
                         </td>
 

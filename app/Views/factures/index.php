@@ -25,9 +25,11 @@ $statutsLabel = [
         <h4 class="mb-1 fw-bold">Factures</h4>
         <p class="text-muted mb-0">Suivi de la facturation et des encaissements</p>
     </div>
+    <?php if (can('factures.create')): ?>
     <a href="<?= site_url('factures/create') ?>" class="btn lc-btn-primary">
         <i class="bi bi-plus-lg me-1"></i> Nouvelle facture
     </a>
+    <?php endif; ?>
 </div>
 
 <div class="lc-card">
@@ -46,13 +48,7 @@ $statutsLabel = [
                 </tr>
             </thead>
             <tbody>
-                <?php if (empty($items)): ?>
-                    <tr>
-                        <td colspan="8" class="text-center text-muted py-5">
-                            Aucune facture pour le moment.
-                        </td>
-                    </tr>
-                <?php else: ?>
+                <?php if (!empty($items)): ?>
                     <?php foreach ($items as $item): ?>
                         <?php
                             $client = trim(($item['client_prenom'] ?? '') . ' ' . ($item['client_nom'] ?? ''));
@@ -89,14 +85,18 @@ $statutsLabel = [
                                 </span>
                             </td>
                             <td class="text-end">
-                                <a href="<?= site_url('factures/' . $item['id']) ?>"
-                                   class="btn btn-sm btn-light border" title="Voir">
-                                    <i class="bi bi-eye"></i>
-                                </a>
+                                <?php if (can('factures.view')): ?>
+                                    <a href="<?= site_url('factures/' . $item['id']) ?>"
+                                       class="btn btn-sm btn-light border" title="Voir">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                <?php endif; ?>
+                                <?php if (can('factures.print')): ?>
                                 <a href="<?= site_url('factures/' . $item['id'] . '/print') ?>"
                                    class="btn btn-sm btn-light border" title="Imprimer" target="_blank">
                                     <i class="bi bi-printer"></i>
                                 </a>
+                                <?php endif; ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>

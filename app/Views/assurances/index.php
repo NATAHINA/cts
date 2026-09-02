@@ -11,11 +11,12 @@
                 Gestion des compagnies d'assurance
             </p>
         </div>
-
+        <?php if (can('assurances.create')): ?>
         <a href="<?= site_url('assurances/create') ?>"
            class="btn lc-btn-primary">
             <i class="bi bi-plus-lg me-1"></i> Ajouter une assurance
         </a>
+        <?php endif; ?>
     </div>
 
     <?php if (session()->getFlashdata('success')) : ?>
@@ -92,23 +93,16 @@
                                 </td>
 
                                 <td class="text-end">
-                                    <!-- <a href="<?= site_url('assurances/' . $assurance['id']) ?>" class="btn btn-sm btn-light border"><i class="bi bi-eye"></i></a> -->
+                                    <?php if (can('assurances.edit')): ?>
                                     <a href="<?= site_url('assurances/' . $assurance['id'] . '/edit') ?>" class="btn btn-sm btn-light border text-primary"><i class="bi bi-pencil"></i></a>
+                                    <?php endif; ?>
+                                    <?php if (can('assurances.delete')): ?>
                                     <a href="<?= site_url('assurances/' . $assurance['id'] . '/delete') ?>" class="btn btn-sm btn-light border text-danger" onclick="return confirm('Supprimer cet élément ?');"><i class="bi bi-trash"></i></a>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
 
                         <?php endforeach; ?>
-
-                    <?php else : ?>
-
-                        <tr>
-                            <td colspan="7"
-                                class="text-center text-muted">
-                                Aucune assurance enregistrée.
-                            </td>
-                        </tr>
-
                     <?php endif; ?>
 
                     </tbody>

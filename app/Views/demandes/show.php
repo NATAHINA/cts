@@ -69,17 +69,23 @@
         </a>
 
         <?php if (!empty($demande['id'])): ?>
+            <?php if (can('demandes.edit')): ?>
             <a href="<?= site_url('demandes/' . $demande['id'] . '/edit') ?>" class="btn btn-light border">
                 <i class="bi bi-pencil-square me-1"></i> Modifier
             </a>
-
+            <?php endif; ?>
+            
+            
             <?php if ($canEditLignes): ?>
+                <?php if (can('cotations.create')): ?>
                 <a href="<?= site_url('demandes/' . $demande['id'] . '/convertir') ?>" class="btn lc-btn-primary">
                     <i class="bi bi-file-earmark-plus me-1"></i> Créer une cotation
                 </a>
+                <?php endif; ?>
             <?php endif; ?>
 
             <?php if (in_array($statut, ['nouvelle', 'abandonnée', 'abandonnee'], true)): ?>
+                <?php if (can('demandes.delete')): ?>
                 <button type="button"
                         class="btn btn-outline-danger"
                         data-bs-toggle="modal"
@@ -87,6 +93,7 @@
                     <i class="bi bi-trash me-1"></i>
                     Supprimer
                 </button>
+                <?php endif; ?>
             <?php endif; ?>
         <?php endif; ?>
     </div>
@@ -665,23 +672,27 @@
 
             <div class="d-grid gap-2">
                 <?php if ($canEditLignes): ?>
+                    <?php if (can('cotations.create')): ?>
                     <a href="<?= site_url('demandes/' . $demande['id'] . '/convertir') ?>"
                        class="btn lc-btn-primary">
                         <i class="bi bi-file-earmark-plus me-2"></i>
                         Convertir en cotation
                     </a>
+                    <?php endif; ?>
                 <?php endif; ?>
 
-                <?php if (!empty($demande['client_email'])): ?>
+                <?php if (can('clients.view')): ?>
+                    <?php if (!empty($demande['client_email'])): ?>
                     <a href="mailto:<?= esc($demande['client_email']) ?>" class="btn btn-light border">
                         <i class="bi bi-envelope me-2"></i> Contacter le client
                     </a>
-                <?php endif; ?>
-
-                <?php if (!empty($demande['client_telephone'])): ?>
+                    <?php endif; ?>
+                
+                    <?php if (!empty($demande['client_telephone'])): ?>
                     <a href="tel:<?= esc($demande['client_telephone']) ?>" class="btn btn-light border">
                         <i class="bi bi-telephone me-2"></i> Appeler le client
                     </a>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
         </div>

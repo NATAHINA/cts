@@ -42,10 +42,12 @@ $statutsLabel = [
         </p>
     </div>
 
+    <?php if (can('demandes.create')): ?>
     <a href="<?= site_url('demandes/new') ?>" class="btn lc-btn-primary">
         <i class="bi bi-plus-lg me-1"></i>
         Nouvelle demande
     </a>
+    <?php endif; ?>
 </div>
 
 <div class="lc-card">
@@ -68,22 +70,29 @@ $statutsLabel = [
                     <?php
                         $statut = $demande['statut'] ?? 'nouvelle';
                         $badgeClass = $statutsClass[$statut] ?? 'bg-secondary';
-                        $badgeLabel = $statutsLabel[$statut] ?? ucfirst(str_replace('_', ' ', $statut));
+                        $badgeLabel = $statutsLabel[$statut]
+                            ?? ucfirst(str_replace('_', ' ', $statut));
                     ?>
+
                     <tr>
                         <td>
                             <a href="<?= site_url('demandes/' . $demande['id']) ?>"
-                               class="fw-semibold text-decoration-none">
+                            class="fw-semibold text-decoration-none">
                                 <?= esc($demande['numero']) ?>
                             </a>
                         </td>
 
                         <td>
-                            <?= esc(trim(($demande['client_prenom'] ?? '') . ' ' . ($demande['client_nom'] ?? ''))) ?>
+                            <?= esc(
+                                trim(
+                                    ($demande['client_prenom'] ?? '') . ' ' .
+                                    ($demande['client_nom'] ?? '')
+                                )
+                            ) ?>
                         </td>
 
                         <td>
-                            <?= esc($demande['destination_nom'] ?? $demande['destination_nom'] ?? '—') ?>
+                            <?= esc($demande['destination_nom'] ?? '—') ?>
                         </td>
 
                         <td>
@@ -93,38 +102,51 @@ $statutsLabel = [
                         </td>
 
                         <td>
-                            <?php if (isset($demande['budget']) && $demande['budget'] !== '' && $demande['budget'] !== null): ?>
-                                <?= number_format((float) $demande['budget'], 0, ',', ' ') ?>
+                            <?php if (
+                                isset($demande['budget']) &&
+                                $demande['budget'] !== '' &&
+                                $demande['budget'] !== null
+                            ): ?>
+
+                                <?= number_format(
+                                    (float) $demande['budget'],
+                                    0,
+                                    ',',
+                                    ' '
+                                ) ?>
+
                                 <?= esc($demande['devise'] ?? '') ?>
+
                             <?php else: ?>
                                 —
                             <?php endif; ?>
                         </td>
 
                         <td>
-                            <span class="badge <?= $badgeClass ?>">
+                            <span class="badge <?= esc($badgeClass) ?>">
                                 <?= esc($badgeLabel) ?>
                             </span>
                         </td>
-
+                        
+                        
                         <td class="text-end">
                             <a href="<?= site_url('demandes/' . $demande['id']) ?>"
-                               class="btn btn-sm btn-light border" title="Voir">
+                            class="btn btn-sm btn-light border"
+                            title="Voir">
                                 <i class="bi bi-eye"></i>
                             </a>
+                            
+                            <?php if (can('demandes.edit')): ?>
                             <a href="<?= site_url('demandes/' . $demande['id'] . '/edit') ?>"
-                               class="btn btn-sm btn-light border" title="Modifier">
+                            class="btn btn-sm btn-light border"
+                            title="Modifier">
                                 <i class="bi bi-pencil"></i>
                             </a>
+                            <?php endif; ?>
                         </td>
                     </tr>
+
                 <?php endforeach; ?>
-            <?php else: ?>
-                <tr>
-                    <td colspan="7" class="text-center text-muted py-5">
-                        Aucune demande enregistrée.
-                    </td>
-                </tr>
             <?php endif; ?>
             </tbody>
         </table>

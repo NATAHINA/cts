@@ -253,19 +253,6 @@
 
                 <?php endforeach; ?>
 
-            <?php else: ?>
-
-                <tr>
-                    <td colspan="10"
-                        class="text-center text-muted py-5">
-
-                        <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
-
-                        Aucun départ programmé.
-
-                    </td>
-                </tr>
-
             <?php endif; ?>
 
             </tbody>

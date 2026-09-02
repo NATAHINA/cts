@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="https://img.icons8.com/color/48/airplane-take-off.png">
     <style>
         :root{ --lc-accent:#4C5FD5; --lc-accent-ink:#37419E; --lc-accent-soft:rgba(76,95,213,0.10); --lc-ink:#1c1e2b; --lc-ink-soft:#6b6d7c; --lc-line:#e6e6ee; }
         *{ box-sizing:border-box; }

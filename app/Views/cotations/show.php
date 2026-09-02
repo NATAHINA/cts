@@ -49,13 +49,16 @@
     <?php if (($cotation['statut'] ?? '') === 'acceptee'): ?>
 
         <?php if (! empty($reservationExistante)): ?>
+            <?php if (can('reservations.view')): ?>
             <a href="<?= site_url('reservations/' . $reservationExistante['id']) ?>"
             class="btn btn-outline-success">
                 <i class="bi bi-calendar-check me-1"></i>
                 Voir la réservation
                 <?= esc($reservationExistante['numero'] ?? '') ?>
             </a>
+        <?php endif; ?>
         <?php else: ?>
+            <?php if (can('reservations.create')): ?>
             <button
                 type="button"
                 class="btn btn-success"
@@ -65,11 +68,12 @@
                 <i class="bi bi-calendar-check me-1"></i>
                 Convertir en réservation
             </button>
+            <?php endif; ?>
         <?php endif; ?>
 
     <?php endif; ?>
 
-
+        <?php if (can('cotations.edit')): ?>
         <a
             href="<?= site_url(
                 'cotations/' . $cotation['id'] . '/edit'
@@ -79,7 +83,8 @@
             <i class="bi bi-pencil me-1"></i>
             Modifier
         </a>
-
+        <?php endif; ?>
+        <?php if (can('cotations.print')): ?>
         <a
             href="<?= site_url(
                 'cotations/' . $cotation['id'] . '/print'
@@ -90,6 +95,7 @@
             <i class="bi bi-printer me-1"></i>
             Imprimer
         </a>
+        <?php endif; ?>
 
     </div>
 

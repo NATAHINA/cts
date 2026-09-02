@@ -25,6 +25,7 @@
             <?php endforeach; ?>
         </select>
 
+        <?php if (can('fournisseurs.create')): ?>
         <a
             href="<?= site_url('fournisseurs/new') ?>"
             class="btn btn-outline-primary"
@@ -33,6 +34,7 @@
             <i class="bi bi-plus-lg"></i>
             Nouveau
         </a>
+        <?php endif; ?>
     </div>
 
     <div class="form-text">

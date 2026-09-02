@@ -6,9 +6,23 @@
         <h4 class="mb-1">Utilisateurs & rôles</h4>
         <p class="text-muted mb-0">Gestion des comptes de l'agence.</p>
     </div>
-    <a href="<?= site_url('utilisateurs/new') ?>" class="btn lc-btn-primary">
-        <i class="bi bi-plus-lg me-1"></i> Nouvel utilisateur
-    </a>
+    <div class="d-flex gap-2">
+
+        <?php if (can('utilisateurs.permissions')): ?>
+            <a href="<?= site_url('roles') ?>" class="btn btn-light border">
+                <i class="bi bi-shield-lock me-1"></i>
+                Gérer les rôles
+            </a>
+        <?php endif; ?>
+
+        <?php if (can('utilisateurs.create')): ?>
+            <a href="<?= site_url('utilisateurs/new') ?>" class="btn lc-btn-primary">
+                <i class="bi bi-plus-lg me-1"></i>
+                Nouvel utilisateur
+            </a>
+        <?php endif; ?>
+
+    </div>
 </div>
 
 <div class="lc-card">
@@ -47,15 +61,19 @@
                             </td>
                             <td class="text-end">
                                 <div class="btn-group">
+                                    <?php if (can('utilisateurs.edit')): ?>
                                     <a href="<?= site_url('utilisateurs/' . $u['id'] . '/edit') ?>"
                                        class="btn btn-sm btn-light border">
                                         <i class="bi bi-pencil"></i>
                                     </a>
+                                    <?php endif; ?>
+                                    <?php if (can('utilisateurs.delete')): ?>
                                     <a href="<?= site_url('utilisateurs/' . $u['id'] . '/delete') ?>"
                                        class="btn btn-sm btn-light border text-danger"
                                        onclick="return confirm('Supprimer cet utilisateur ?')">
                                         <i class="bi bi-trash"></i>
                                     </a>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>

@@ -8,10 +8,12 @@
         <p class="text-muted mb-0">Gestion des devises et taux de change</p>
     </div>
 
+    <?php if (can('devises.create')): ?>
     <a href="<?= site_url('devises/new') ?>" class="btn lc-btn-primary">
         <i class="bi bi-plus-lg me-1"></i>
         Nouvelle devise
     </a>
+    <?php endif; ?>
 </div>
 
 <?php if (session()->getFlashdata('success')): ?>
@@ -57,6 +59,7 @@
                                 <?php if (!empty($devise['is_default'])): ?>
                                     <span class="badge bg-success">Par défaut</span>
                                 <?php else: ?>
+                                    <?php if (can('devises.default')): ?>
                                     <form method="post"
                                           action="<?= site_url('devises/' . $devise['id'] . '/set-default') ?>"
                                           class="d-inline">
@@ -65,54 +68,58 @@
                                             Définir
                                         </button>
                                     </form>
+                                    <?php endif; ?>
                                 <?php endif; ?>
                             </td>
                             <td class="text-end">
+                                <?php if (can('devises.edit')): ?>
                                 <a href="<?= site_url('devises/' . $devise['id'] . '/edit') ?>"
                                    class="btn btn-sm btn-light border"
                                    title="Modifier">
                                     <i class="bi bi-pencil"></i>
                                 </a>
+                                <?php endif; ?>
+                                <?php if (can('devises.delete')): ?>
+                                    <?php if (empty($devise['is_default'])): ?>
+                                        <button type="button"
+                                                class="btn btn-sm btn-light border text-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalDelete<?= $devise['id'] ?>"
+                                                title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
 
-                                <?php if (empty($devise['is_default'])): ?>
-                                    <button type="button"
-                                            class="btn btn-sm btn-light border text-danger"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modalDelete<?= $devise['id'] ?>"
-                                            title="Supprimer">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-
-                                    <!-- Modal suppression -->
-                                    <div class="modal fade" id="modalDelete<?= $devise['id'] ?>" tabindex="-1">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title text-danger">
-                                                        <i class="bi bi-exclamation-triangle me-2"></i>
-                                                        Supprimer la devise
-                                                    </h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    Voulez-vous vraiment supprimer la devise
-                                                    <strong><?= esc($devise['code']) ?></strong> ?
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">
-                                                        Annuler
-                                                    </button>
-                                                    <form method="post"
-                                                          action="<?= site_url('devises/' . $devise['id'] . '/delete') ?>">
-                                                        <?= csrf_field() ?>
-                                                        <button type="submit" class="btn btn-danger">
-                                                            Oui, supprimer
+                                        <!-- Modal suppression -->
+                                        <div class="modal fade" id="modalDelete<?= $devise['id'] ?>" tabindex="-1">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title text-danger">
+                                                            <i class="bi bi-exclamation-triangle me-2"></i>
+                                                            Supprimer la devise
+                                                        </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        Voulez-vous vraiment supprimer la devise
+                                                        <strong><?= esc($devise['code']) ?></strong> ?
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-light border" data-bs-dismiss="modal">
+                                                            Annuler
                                                         </button>
-                                                    </form>
+                                                        <form method="post"
+                                                            action="<?= site_url('devises/' . $devise['id'] . '/delete') ?>">
+                                                            <?= csrf_field() ?>
+                                                            <button type="submit" class="btn btn-danger">
+                                                                Oui, supprimer
+                                                            </button>
+                                                        </form>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    <?php endif; ?>
                                 <?php endif; ?>
                             </td>
                         </tr>

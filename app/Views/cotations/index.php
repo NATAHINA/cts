@@ -12,13 +12,15 @@
         </p>
     </div>
 
-    <a href="<?= site_url('cotations/new') ?>"
-       class="btn lc-btn-primary">
+    <?php if (can('cotations.create')): ?>
+        <a href="<?= site_url('cotations/new') ?>"
+           class="btn lc-btn-primary">
 
         <i class="bi bi-plus-lg me-1"></i>
         Nouvelle cotation
 
-    </a>
+        </a>
+    <?php endif; ?>
 
 </div>
 
@@ -145,7 +147,7 @@
 
 
                             <td class="text-end">
-
+                                <?php if (can('cotations.view')): ?>
                                 <a
                                     href="<?= site_url(
                                         'cotations/' . $item['id']
@@ -155,7 +157,8 @@
                                 >
                                     <i class="bi bi-eye"></i>
                                 </a>
-
+                                <?php endif; ?>
+                                <?php if (can('cotations.edit')): ?>
 
                                 <a
                                     href="<?= site_url(
@@ -166,32 +169,14 @@
                                 >
                                     <i class="bi bi-pencil"></i>
                                 </a>
-
+                                <?php endif; ?>
+                                
                             </td>
 
                         </tr>
 
                     <?php endforeach; ?>
-
-                <?php else: ?>
-
-                    <tr>
-
-                        <td
-                            colspan="7"
-                            class="text-center text-muted py-5"
-                        >
-
-                            <i class="bi bi-file-earmark-text fs-3 d-block mb-2"></i>
-
-                            Aucune cotation enregistrée.
-
-                        </td>
-
-                    </tr>
-
                 <?php endif; ?>
-
             </tbody>
 
         </table>

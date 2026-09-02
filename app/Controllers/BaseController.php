@@ -10,10 +10,6 @@ use App\Models\TenantAccountModel;
 
 abstract class BaseController extends Controller
 {
-    protected $helpers = [
-        'url',
-        'form',
-    ];
 
     protected TenantAccountModel $tenantAccountModel;
 

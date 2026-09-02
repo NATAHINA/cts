@@ -11,10 +11,12 @@
         </small>
     </div>
 
-    <a href="<?= site_url('forfaits/new') ?>" class="btn lc-btn-primary">
-        <i class="bi bi-plus-lg me-1"></i>
-        Ajouter un forfait
-    </a>
+    <?php if (can('forfaits.create')): ?>
+        <a href="<?= site_url('forfaits/new') ?>" class="btn lc-btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>
+            Ajouter un forfait
+        </a>
+    <?php endif; ?>
 
 </div>
 
@@ -52,18 +54,7 @@
 
             <tbody>
 
-                <?php if (empty($items)): ?>
-
-                    <tr>
-                        <td colspan="9" class="text-secondary text-center py-5">
-                            <i class="bi bi-inbox" style="font-size: 2rem;"></i>
-                            <div class="mt-2">
-                                Aucun forfait pour le moment.
-                            </div>
-                        </td>
-                    </tr>
-
-                <?php endif; ?>
+                <?php if (!empty($items)): ?>
 
                 <?php foreach ($items as $it): ?>
 
@@ -175,7 +166,7 @@
                         </td>
 
                         <td class="text-end">
-
+                            <?php if (can('forfaits.edit')): ?>
                             <a
                                 href="<?= site_url(
                                     'forfaits/' . $it['id'] . '/edit'
@@ -185,7 +176,8 @@
                             >
                                 <i class="bi bi-pencil"></i>
                             </a>
-
+                            <?php endif; ?>
+                            <?php if (can('forfaits.delete')): ?>
                             <a
                                 href="<?= site_url(
                                     'forfaits/' . $it['id'] . '/delete'
@@ -196,12 +188,14 @@
                             >
                                 <i class="bi bi-trash"></i>
                             </a>
+                            <?php endif; ?>
 
                         </td>
 
                     </tr>
 
                 <?php endforeach; ?>
+                <?php endif; ?>
 
             </tbody>
 

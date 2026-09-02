@@ -16,6 +16,7 @@
 
     </div>
 
+    <?php if (can('reservations.create')): ?>
     <a href="<?= site_url('reservations/new') ?>"
        class="btn lc-btn-primary">
 
@@ -23,6 +24,7 @@
         Nouvelle réservation
 
     </a>
+    <?php endif; ?>
 
 </div>
 
@@ -34,9 +36,7 @@
         <table id="reservationsTable" class="table align-middle mb-0">
 
             <thead>
-
                 <tr>
-
                     <th>Numéro</th>
                     <th>Client</th>
                     <th>Destination</th>
@@ -45,28 +45,12 @@
                     <th class="text-end">Montant total</th>
                     <th>Statut</th>
                     <th class="text-end">Actions</th>
-
                 </tr>
-
             </thead>
-
 
             <tbody>
 
-                <?php if (empty($reservations)): ?>
-
-                    <tr>
-
-                        <td colspan="8"
-                            class="text-center text-muted py-5">
-
-                            Aucune réservation enregistrée.
-
-                        </td>
-
-                    </tr>
-
-                <?php else: ?>
+                <?php if (!empty($reservations)): ?>
 
                     <?php foreach ($reservations as $reservation): ?>
 
@@ -195,7 +179,7 @@
                             <td class="text-end">
 
                                 <div class="btn-group">
-
+                                    <?php if (can('reservations.view')): ?>
                                     <a
                                         href="<?= site_url(
                                             'reservations/' .
@@ -208,8 +192,9 @@
                                         <i class="bi bi-eye"></i>
 
                                     </a>
+                                    <?php endif; ?>
 
-
+                                    <?php if (can('reservations.edit')): ?>
                                     <a
                                         href="<?= site_url(
                                             'reservations/' .
@@ -223,8 +208,9 @@
                                         <i class="bi bi-pencil"></i>
 
                                     </a>
+                                    <?php endif; ?>
 
-
+                                    <?php if (can('reservations.delete')): ?>
                                     <a
                                         href="<?= site_url(
                                             'reservations/' .
@@ -241,6 +227,7 @@
                                         <i class="bi bi-trash"></i>
 
                                     </a>
+                                    <?php endif; ?>
 
                                 </div>
 

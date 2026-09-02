@@ -42,22 +42,28 @@ $statutClass = match ($statut) {
         ?>
 
         <?php if (! empty($factureExistante)): ?>
+            <?php if (can('factures.view')): ?>
             <a href="<?= site_url('factures/' . $factureExistante['id']) ?>"
             class="btn btn-light border">
                 <i class="bi bi-receipt me-1"></i>
                 Voir la facture
                 <?= esc($factureExistante['numero']) ?>
             </a>
+            <?php endif; ?>
+            
 
             <?php if ((float)($factureExistante['montant_restant'] ?? 0) > 0): ?>
+                <?php if (can('paiements.create')): ?>
                 <a href="<?= site_url('factures/' . $factureExistante['id']) ?>#paiement"
                 class="btn lc-btn-primary">
                     <i class="bi bi-cash-coin me-1"></i>
                     Enregistrer un paiement
                 </a>
+                <?php endif; ?>
             <?php endif; ?>
 
         <?php elseif ($peutFacturer): ?>
+            <?php if (can('factures.create')): ?>
             <button type="button"
                     class="btn lc-btn-primary"
                     data-bs-toggle="modal"
@@ -65,8 +71,10 @@ $statutClass = match ($statut) {
                 <i class="bi bi-receipt me-1"></i>
                 Créer la facture
             </button>
+            <?php endif; ?>
         <?php endif; ?>
-
+        
+        <?php if (can('reservations.edit')): ?>
         <a href="<?= site_url('reservations/' . $reservation['id'] . '/edit') ?>"
            class="btn btn-info border">
 
@@ -74,6 +82,7 @@ $statutClass = match ($statut) {
             Modifier
 
         </a>
+        <?php endif; ?>
 
         <a href="<?= site_url('reservations') ?>"
            class="btn btn-light border">

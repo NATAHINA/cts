@@ -11,9 +11,6 @@ use \App\Models\DeviseModel;
 
 class AuthController extends BaseController
 {
-    // -------------------------------------------------------------
-    // LOGIN
-    // -------------------------------------------------------------
     public function login()
     {
         if (session()->get('isLoggedIn')) {
@@ -24,6 +21,8 @@ class AuthController extends BaseController
     }
 
     public function attemptLogin(){
+        $db = db_connect();
+
         $rules = [
             'email'    => 'required|valid_email',
             'password' => 'required|min_length[6]',
@@ -44,9 +43,9 @@ class AuthController extends BaseController
 
         $userModel = new UserModel();
 
+
         $user = $userModel->findByEmail($email);
 
-        // Vérification utilisateur + mot de passe
         if (
             ! $user ||
             empty($user['password']) ||
@@ -58,20 +57,24 @@ class AuthController extends BaseController
                 ->with('error', 'Identifiants incorrects.');
         }
 
-        // Vérification compte actif
-        if ((int) $user['actif'] !== 1) {
+        if ((int) ($user['actif'] ?? 0) !== 1) {
             return redirect()
                 ->back()
                 ->withInput()
-                ->with('error', 'Ce compte utilisateur est désactivé.');
+                ->with(
+                    'error',
+                    'Ce compte utilisateur est désactivé.'
+                );
         }
 
-        // Récupération de l'agence
         $tenantModel = new TenantAccountModel();
 
-        $tenant = $tenantModel->find($user['tenant_id']);
+        $tenant = $tenantModel
+            ->where('id', $user['tenant_id'])
+            ->where('statut', 'actif')
+            ->first();
 
-        if (! $tenant || $tenant['statut'] !== 'actif') {
+        if (! $tenant) {
             return redirect()
                 ->back()
                 ->withInput()
@@ -81,21 +84,49 @@ class AuthController extends BaseController
                 );
         }
 
-        // Mise à jour de la dernière connexion
+        $role = $db
+            ->table('roles')
+            ->select('id, code, libelle')
+            ->where('id', $user['role_id'])
+            ->where('tenant_id', $tenant['id'])
+            ->get()
+            ->getRowArray();
+
+        if (! $role) {
+
+            log_message(
+                'error',
+                'Rôle invalide pour utilisateur ID ' .
+                $user['id'] .
+                ' et tenant ID ' .
+                $tenant['id']
+            );
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'Le rôle de votre compte est invalide. Contactez l\'administrateur.'
+                );
+        }
+
         $userModel->update($user['id'], [
             'dernier_login' => date('Y-m-d H:i:s'),
         ]);
 
-        // Session
+        session()->regenerate();
+
         session()->set([
-            'isLoggedIn' => true,
-            'user_id'    => $user['id'],
-            'user_nom'   => trim(
-                ($user['nom'] ?? '') . ' ' . $user['prenom']
+            'isLoggedIn'     => true,
+            'user_id'        => $user['id'],
+            'user_nom'       => trim(
+                ($user['nom'] ?? '') . ' ' . ($user['prenom'] ?? '')
             ),
-            'user_role'  => $user['role_id'],
-            'tenant_id'  => $tenant['id'],
-            'tenant_nom' => $tenant['nom_agence'],
+            'user_role'      => (int) $role['id'],
+            'user_role_code' => $role['code'],
+            'tenant_id'      => (int) $tenant['id'],
+            'tenant_nom'     => $tenant['nom_agence'],
         ]);
 
         return redirect()->to('/');
@@ -113,45 +144,75 @@ class AuthController extends BaseController
         return view('auth/register');
     }
 
-    public function attemptRegister()
-    {
-        log_message('debug', '--- attemptRegister called ---');
-
+    public function attemptRegister(){
+    
         $rules = [
-            'nom_agence' => 'required|min_length[2]|max_length[150]',
-            'nom'        => 'required|min_length[2]|max_length[100]',
-            'prenom'     => 'permit_empty|max_length[100]',
-            'email'      => 'required|valid_email|is_unique[users.email]',
-            'password'   => 'required|min_length[6]',
+            'nom_agence'       => 'required|min_length[2]|max_length[150]',
+            'nom'              => 'required|min_length[2]|max_length[100]',
+            'prenom'           => 'permit_empty|max_length[100]',
+            'email'            => 'required|valid_email|is_unique[users.email]',
+            'password'         => 'required|min_length[6]',
             'password_confirm' => 'required|matches[password]',
         ];
 
         if (! $this->validate($rules)) {
-            return redirect()->back()->withInput()->with('error', implode(' ', $this->validator->getErrors()));
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with(
+                    'error',
+                    implode(' ', $this->validator->getErrors())
+                );
         }
 
         $tenantModel = new TenantAccountModel();
         $userModel   = new UserModel();
-        $roleModel = new RoleModel();
+        $roleModel   = new RoleModel();
         $deviseModel = new DeviseModel();
 
-        $db = \Config\Database::connect();
+        $db = db_connect();
+
         $db->transStart();
 
-        $slugBase = url_title($this->request->getPost('nom_agence'), '-', true);
-        $slug     = $slugBase;
-        $suffix   = 1;
+        $slugBase = url_title(
+            $this->request->getPost('nom_agence'),
+            '-',
+            true
+        );
+
+        $slug = $slugBase;
+        $suffix = 1;
+
         while ($tenantModel->where('slug', $slug)->first()) {
             $slug = $slugBase . '-' . (++$suffix);
         }
 
         $tenantId = $tenantModel->insert([
-            'nom_agence'    => $this->request->getPost('nom_agence'),
+            'nom_agence'    => trim($this->request->getPost('nom_agence')),
             'slug'          => $slug,
-            'email_contact' => $this->request->getPost('email'),
+            'email_contact' => trim($this->request->getPost('email')),
             'plan'          => 'essai',
             'statut'        => 'actif',
         ]);
+
+        if ($tenantId === false) {
+
+            log_message(
+                'error',
+                'Tenant insert failed: ' .
+                json_encode($tenantModel->errors())
+            );
+
+            $db->transRollback();
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'Impossible de créer le compte agence.'
+                );
+        }
 
         $role = $roleModel
             ->where('tenant_id', $tenantId)
@@ -159,64 +220,192 @@ class AuthController extends BaseController
             ->first();
 
         if (! $role) {
+
             $roleId = $roleModel->insert([
                 'tenant_id'   => $tenantId,
                 'code'        => 'admin',
                 'libelle'     => 'Administrateur',
                 'description' => 'Administrateur de l’agence',
             ]);
-        } else {
-            $roleId = $role['id'];
-        }
 
-        if ($tenantId === false) {
-            log_message('error', 'Tenant insert failed: ' . json_encode($tenantModel->errors()));
+            if ($roleId === false) {
+
+                log_message(
+                    'error',
+                    'Role insert failed: ' .
+                    json_encode($roleModel->errors())
+                );
+
+                $db->transRollback();
+
+                return redirect()
+                    ->back()
+                    ->withInput()
+                    ->with(
+                        'error',
+                        'Impossible de créer le rôle administrateur.'
+                    );
+            }
+
+        } else {
+
+            $roleId = $role['id'];
         }
 
         $userId = $userModel->insert([
             'tenant_id' => $tenantId,
             'role_id'   => $roleId,
-            'nom'       => $this->request->getPost('nom'),
-            'prenom'    => $this->request->getPost('prenom'),
-            'email'     => $this->request->getPost('email'),
+            'nom'       => trim($this->request->getPost('nom')),
+            'prenom'    => trim($this->request->getPost('prenom')),
+            'email'     => trim($this->request->getPost('email')),
             'password'  => $this->request->getPost('password'),
             'actif'     => 1,
         ]);
 
         if ($userId === false) {
-            log_message('error', 'User insert failed: ' . json_encode($userModel->errors()));
+
+            log_message(
+                'error',
+                'User insert failed: ' .
+                json_encode($userModel->errors())
+            );
+
+            $db->transRollback();
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'Impossible de créer le compte utilisateur.'
+                );
         }
 
-        // Insert devise
         $devises = [
-            ['tenant_id' => $tenantId, 'code' => 'MGA', 'nom' => 'Ariary',     'symbole' => 'Ar', 'taux_change' => 1,    'is_default' => 1],
-            ['tenant_id' => $tenantId, 'code' => 'EUR', 'nom' => 'Euro',       'symbole' => '€',  'taux_change' => 4800, 'is_default' => 0],
-            ['tenant_id' => $tenantId, 'code' => 'USD', 'nom' => 'Dollar US',  'symbole' => '$',  'taux_change' => 4500, 'is_default' => 0],
+
+            [
+                'tenant_id'    => $tenantId,
+                'code'         => 'MGA',
+                'nom'          => 'Ariary',
+                'symbole'      => 'Ar',
+                'taux_change'  => 1,
+                'is_default'   => 1,
+            ],
+
+            [
+                'tenant_id'    => $tenantId,
+                'code'         => 'EUR',
+                'nom'          => 'Euro',
+                'symbole'      => '€',
+                'taux_change'  => 4800,
+                'is_default'   => 0,
+            ],
+
+            [
+                'tenant_id'    => $tenantId,
+                'code'         => 'USD',
+                'nom'          => 'Dollar US',
+                'symbole'      => '$',
+                'taux_change'  => 4500,
+                'is_default'   => 0,
+            ],
+
         ];
 
-        $deviseId = $deviseModel->insert($devises);
+        $deviseResult = $deviseModel->insertBatch($devises);
 
-        if ($deviseId === false) {
-            log_message('error', 'Devise insert failed: ' . json_encode($deviseModel->errors()));
+        if ($deviseResult === false) {
+
+            log_message(
+                'error',
+                'Devise insert failed: ' .
+                json_encode($deviseModel->errors())
+            );
+
+            $db->transRollback();
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'Impossible de créer les devises par défaut.'
+                );
         }
+
+        $permissions = $db
+            ->table('permissions')
+            ->select('id')
+            ->get()
+            ->getResultArray();
+
+        if (! empty($permissions)) {
+
+            $rolePermissions = [];
+
+            foreach ($permissions as $permission) {
+
+                $rolePermissions[] = [
+                    'role_id'       => $roleId,
+                    'permission_id' => $permission['id'],
+                ];
+            }
+        
+            if (! empty($rolePermissions)) {
+
+                $existing = $db
+                    ->table('role_permissions')
+                    ->where('role_id', $roleId)
+                    ->countAllResults();
+
+                if ($existing === 0) {
+
+                    $db
+                        ->table('role_permissions')
+                        ->insertBatch($rolePermissions);
+                }
+            }
+        }
+
 
         $db->transComplete();
 
         if ($db->transStatus() === false) {
-            log_message('error', 'DB transaction failed: ' . $db->error()['message']);
-            return redirect()->back()->withInput()->with('error', "Une erreur est survenue lors de la création du compte. Merci de réessayer.");
+
+            log_message(
+                'error',
+                'DB transaction failed: ' .
+                json_encode($db->error())
+            );
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'Une erreur est survenue lors de la création du compte. Merci de réessayer.'
+                );
         }
 
         session()->set([
-            'isLoggedIn' => true,
-            'user_id'    => $userId,
-            'user_nom'   => trim($this->request->getPost('nom') . ' ' . $this->request->getPost('prenom')),
-            'user_role'  => 'admin',
-            'tenant_id'  => $tenantId,
-            'tenant_nom' => $this->request->getPost('nom_agence'),
+            'isLoggedIn'     => true,
+            'user_id'        => $userId,
+            'user_nom'       => trim(
+                $this->request->getPost('nom') . ' ' .
+                $this->request->getPost('prenom')
+            ),
+            'user_role'      => $roleId,
+            'user_role_code' => 'admin',
+            'tenant_id'      => $tenantId,
+            'tenant_nom'     => $this->request->getPost('nom_agence'),
         ]);
 
-        return redirect()->to('/')->with('success', 'Bienvenue ! Votre espace agence a été créé.');
+        return redirect()
+            ->to('/')
+            ->with(
+                'success',
+                'Bienvenue ! Votre espace agence a été créé.'
+            );
     }
 
     // -------------------------------------------------------------
