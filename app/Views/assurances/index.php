@@ -37,9 +37,9 @@
     <div class="card">
         <div class="card-body">
 
-            <div class="table-responsive">
+            <div class="table-responsive p-4">
 
-                <table class="table table-bordered table-hover align-middle">
+                <table id="assuranceTable" class="table table-bordered table-hover align-middle">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -119,5 +119,56 @@
     </div>
 
 </div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        $('#assuranceTable').DataTable({
+            responsive: true,
+            pageLength: 10,
+            lengthMenu: [
+                [10, 25, 50, 100, -1],
+                [10, 25, 50, 100, 'Tous']
+            ],
+
+            order: [
+                [0, 'asc']
+            ],
+
+            columnDefs: [
+                {
+                    orderable: false,
+                    searchable: false
+                }
+            ],
+
+            language: {
+                processing: 'Traitement en cours...',
+                search: 'Rechercher :',
+                lengthMenu: 'Afficher _MENU_ assurances',
+                info: 'Affichage de _START_ à _END_ sur _TOTAL_ assurances',
+                infoEmpty: 'Affichage de 0 à 0 sur 0 assurance',
+                infoFiltered: '(filtré à partir de _MAX_ assurances au total)',
+                infoPostFix: '',
+                loadingRecords: 'Chargement en cours...',
+                zeroRecords: 'Aucune assurance trouvée',
+                emptyTable: 'Aucune assurance enregistrée',
+                paginate: {
+                    first: 'Premier',
+                    previous: 'Précédent',
+                    next: 'Suivant',
+                    last: 'Dernier'
+                },
+                aria: {
+                    sortAscending: ': activer pour trier la colonne par ordre croissant',
+                    sortDescending: ': activer pour trier la colonne par ordre décroissant'
+                }
+            }
+        });
+
+    });
+</script>
+
 
 <?= $this->endSection() ?>

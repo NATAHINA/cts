@@ -29,11 +29,6 @@ class ReservationController extends BaseController
         $this->planningModel    = new PlanningDepartModel();
     }
 
-    private function tenantId(): int
-    {
-        return (int) session('tenant_id');
-    }
-
     private function getReservation(int $id): ?array
     {
         return $this->model

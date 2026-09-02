@@ -17,11 +17,6 @@ class UtilisateurController extends BaseController
         $this->roleModel = new RoleModel();
     }
 
-    private function tenantId(): int
-    {
-        return (int) session('tenant_id');
-    }
-
     public function index()
     {
         $users = $this->userModel

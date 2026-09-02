@@ -20,9 +20,9 @@
 
 <div class="lc-card">
 
-    <div class="table-responsive">
+    <div class="table-responsive p-4">
 
-        <table class="table align-middle mb-0">
+        <table id="fournisseursTable" class="table align-middle mb-0">
 
             <thead>
                 <tr>
@@ -80,5 +80,57 @@
     </div>
 
 </div>
+
+
+<script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+        $('#fournisseursTable').DataTable({
+            responsive: true,
+            pageLength: 10,
+            lengthMenu: [
+                [10, 25, 50, 100, -1],
+                [10, 25, 50, 100, 'Tous']
+            ],
+
+            order: [
+                [0, 'asc']
+            ],
+
+            columnDefs: [
+                {
+                    targets: 6,
+                    orderable: false,
+                    searchable: false
+                }
+            ],
+
+            language: {
+                processing: 'Traitement en cours...',
+                search: 'Rechercher :',
+                lengthMenu: 'Afficher _MENU_ fournisseurs',
+                info: 'Affichage de _START_ à _END_ sur _TOTAL_ fournisseurs',
+                infoEmpty: 'Affichage de 0 à 0 sur 0 fournisseur',
+                infoFiltered: '(filtré à partir de _MAX_ fournisseurs au total)',
+                infoPostFix: '',
+                loadingRecords: 'Chargement en cours...',
+                zeroRecords: 'Aucun fournisseur trouvé',
+                emptyTable: 'Aucun fournisseur enregistré',
+                paginate: {
+                    first: 'Premier',
+                    previous: 'Précédent',
+                    next: 'Suivant',
+                    last: 'Dernier'
+                },
+                aria: {
+                    sortAscending: ': activer pour trier la colonne par ordre croissant',
+                    sortDescending: ': activer pour trier la colonne par ordre décroissant'
+                }
+            }
+        });
+
+    });
+</script>
+
 
 <?= $this->endSection() ?>

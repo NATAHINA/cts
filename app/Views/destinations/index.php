@@ -7,9 +7,9 @@
     <a href="<?= site_url('destinations/new') ?>" class="btn lc-btn-primary"><i class="bi bi-plus-lg me-1"></i> Ajouter</a>
 </div>
 
-<div class="lc-card p-3">
-    <div class="table-responsive">
-        <table class="table align-middle mb-0">
+<div class="lc-card">
+    <div class="table-responsive p-4">
+        <table id="destinationTable" class="table align-middle mb-0">
             <thead>
                 <tr class="text-secondary small">
                     <th>Nom</th>
@@ -39,5 +39,56 @@
         </table>
     </div>
 </div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        $('#destinationTable').DataTable({
+            responsive: true,
+            pageLength: 10,
+            lengthMenu: [
+                [10, 25, 50, 100, -1],
+                [10, 25, 50, 100, 'Tous']
+            ],
+
+            order: [
+                [0, 'asc']
+            ],
+
+            columnDefs: [
+                {
+                    orderable: false,
+                    searchable: false
+                }
+            ],
+
+            language: {
+                processing: 'Traitement en cours...',
+                search: 'Rechercher :',
+                lengthMenu: 'Afficher _MENU_ destinations',
+                info: 'Affichage de _START_ à _END_ sur _TOTAL_ destinations',
+                infoEmpty: 'Affichage de 0 à 0 sur 0 destination',
+                infoFiltered: '(filtré à partir de _MAX_ destinations au total)',
+                infoPostFix: '',
+                loadingRecords: 'Chargement en cours...',
+                zeroRecords: 'Aucune destination trouvée',
+                emptyTable: 'Aucune destination enregistrée',
+                paginate: {
+                    first: 'Premier',
+                    previous: 'Précédent',
+                    next: 'Suivant',
+                    last: 'Dernier'
+                },
+                aria: {
+                    sortAscending: ': activer pour trier la colonne par ordre croissant',
+                    sortDescending: ': activer pour trier la colonne par ordre décroissant'
+                }
+            }
+        });
+
+    });
+</script>
+
 
 <?= $this->endSection() ?>

@@ -20,11 +20,6 @@ class RestaurantController extends BaseController
         $this->fournisseurModel = new FournisseurModel();
     }
 
-    private function tenantId(): int
-    {
-        return (int) session('tenant_id');
-    }
-
     private function getRestaurant(int $id): ?array
     {
         return $this->model

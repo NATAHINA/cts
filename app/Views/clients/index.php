@@ -19,11 +19,8 @@
 </div>
 
 <div class="lc-card">
-
-    <div class="table-responsive">
-
-        <table class="table align-middle mb-0">
-
+    <div class="table-responsive p-4">
+        <table id="clientsTable" class="table align-middle mb-0">
             <thead>
                 <tr>
                     <th>Client</th>
@@ -88,5 +85,57 @@
     </div>
 
 </div>
+
+
+<script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+        $('#clientsTable').DataTable({
+            responsive: true,
+            pageLength: 10,
+            lengthMenu: [
+                [10, 25, 50, 100, -1],
+                [10, 25, 50, 100, 'Tous']
+            ],
+
+            order: [
+                [3, 'desc']
+            ],
+
+            columnDefs: [
+                {
+                    targets: 6,
+                    orderable: false,
+                    searchable: false
+                }
+            ],
+
+            language: {
+                processing: 'Traitement en cours...',
+                search: 'Rechercher :',
+                lengthMenu: 'Afficher _MENU_ clients',
+                info: 'Affichage de _START_ à _END_ sur _TOTAL_ clients',
+                infoEmpty: 'Affichage de 0 à 0 sur 0 client',
+                infoFiltered: '(filtré à partir de _MAX_ clients au total)',
+                infoPostFix: '',
+                loadingRecords: 'Chargement en cours...',
+                zeroRecords: 'Aucun client trouvé',
+                emptyTable: 'Aucun client enregistré',
+                paginate: {
+                    first: 'Premier',
+                    previous: 'Précédent',
+                    next: 'Suivant',
+                    last: 'Dernier'
+                },
+                aria: {
+                    sortAscending: ': activer pour trier la colonne par ordre croissant',
+                    sortDescending: ': activer pour trier la colonne par ordre décroissant'
+                }
+            }
+        });
+
+    });
+</script>
+
 
 <?= $this->endSection() ?>

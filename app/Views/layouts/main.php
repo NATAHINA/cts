@@ -30,6 +30,10 @@
 		type="image/x-icon"
 		href="https://img.icons8.com/color/48/airplane-take-off.ico"
 	>
+	
+	<link rel="stylesheet"
+      href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+
 	<style>
 		:root{
 			--lc-accent:       #4C5FD5;
@@ -921,7 +925,9 @@
 <script
 	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
 </script>
-
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
 
 <!-- ==========================================================
 	 SIDEBAR MOBILE JAVASCRIPT

@@ -537,10 +537,10 @@ $routes->post('paiements/(:num)/annuler', 'PaiementController::annuler/$1');
         'ParametresController::updateConditions'
     );
 
-    $routes->group('parametres', ['filter' => 'auth'], static function ($routes) {
-        $routes->get('/',     'ParametresController::index');
-        $routes->post('/',    'ParametresController::update');
-    });
+    $routes->get('parametres', 'ParametresController::index');
+    $routes->post('parametres/update', 'ParametresController::update');
+    $routes->post('parametres/logo/delete', 'ParametresController::deleteLogo');
+    
 
     $routes->group('restaurants', ['filter' => 'auth'], static function ($routes) {
         $routes->get('/',                'RestaurantController::index');

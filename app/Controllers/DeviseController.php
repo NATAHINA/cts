@@ -13,12 +13,6 @@ class DeviseController extends BaseController
     {
         $this->deviseModel = new DeviseModel();
     }
-
-    private function tenantId(): int
-    {
-        return (int) session('tenant_id');
-    }
-
     /**
      * Liste des devises
      */

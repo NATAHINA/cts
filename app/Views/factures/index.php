@@ -30,9 +30,9 @@ $statutsLabel = [
     </a>
 </div>
 
-<div class="lc-card p-0">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
+<div class="lc-card">
+    <div class="table-responsive p-4">
+        <table id="facturesTable" class="table table-hover align-middle mb-0">
             <thead class="table-light">
                 <tr>
                     <th>N°</th>
@@ -105,5 +105,57 @@ $statutsLabel = [
         </table>
     </div>
 </div>
+
+
+<script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+        $('#facturesTable').DataTable({
+            responsive: true,
+            pageLength: 10,
+            lengthMenu: [
+                [10, 25, 50, 100, -1],
+                [10, 25, 50, 100, 'Tous']
+            ],
+
+            order: [
+                [0, 'desc']
+            ],
+
+            columnDefs: [
+                {
+                    targets: 6,
+                    orderable: false,
+                    searchable: false
+                }
+            ],
+
+            language: {
+                processing: 'Traitement en cours...',
+                search: 'Rechercher :',
+                lengthMenu: 'Afficher _MENU_ factures',
+                info: 'Affichage de _START_ à _END_ sur _TOTAL_ factures',
+                infoEmpty: 'Affichage de 0 à 0 sur 0 facture',
+                infoFiltered: '(filtré à partir de _MAX_ factures au total)',
+                infoPostFix: '',
+                loadingRecords: 'Chargement en cours...',
+                zeroRecords: 'Aucune facture trouvée',
+                emptyTable: 'Aucune facture enregistrée',
+                paginate: {
+                    first: 'Premier',
+                    previous: 'Précédent',
+                    next: 'Suivant',
+                    last: 'Dernier'
+                },
+                aria: {
+                    sortAscending: ': activer pour trier la colonne par ordre croissant',
+                    sortDescending: ': activer pour trier la colonne par ordre décroissant'
+                }
+            }
+        });
+
+    });
+</script>
+
 
 <?= $this->endSection() ?>

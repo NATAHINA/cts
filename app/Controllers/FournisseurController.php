@@ -14,11 +14,6 @@ class FournisseurController extends BaseController
         $this->model = new FournisseurModel();
     }
 
-    private function tenantId()
-    {
-        return (int) session('tenant_id');
-    }
-
     public function index()
     {
         return view('fournisseurs/index', [

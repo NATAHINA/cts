@@ -29,7 +29,7 @@ $numero = $cotation['numero']
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= esc($title) ?></title>
     <style>
-        :root { color: #202532; font-family: Arial, sans-serif; }
+        :root { color: #202532; font-family: 'Inter', sans-serif; }
         * { box-sizing: border-box; }
         body { margin: 0; background: #eef0f5; }
         .toolbar { padding: 16px; text-align: center; }
@@ -44,7 +44,7 @@ $numero = $cotation['numero']
         }
         .header {
             display: flex; justify-content: space-between; gap: 24px;
-            padding-bottom: 26px; border-bottom: 3px solid #4c5fd5;
+            padding-bottom: 26px; border-bottom: 1px solid #4c5fd5;
         }
         .brand { font-size: 24px; font-weight: 700; color: #37419e; }
         .muted { color: #687083; font-size: 13px; }
@@ -59,7 +59,7 @@ $numero = $cotation['numero']
         .info-block strong { font-size: 12px; }
         table { width: 100%; border-collapse: collapse; margin-top: 12px; }
         th {
-            padding: 11px 8px; border-bottom: 2px solid #202532;
+            padding: 11px 8px; border-bottom: 1px solid #202532;
             font-size: 11px; text-align: left; text-transform: uppercase;
         }
         td { padding: 12px 8px; border-bottom: 1px solid #e3e6ec; font-size: 13px; vertical-align: top; }
@@ -85,6 +85,30 @@ $numero = $cotation['numero']
             .header, .info { grid-template-columns: 1fr; display: grid; }
             h1, .meta { text-align: left; }
         }
+        .agency {
+            margin-top: 8px;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #687083;
+        }
+
+        .agency-name {
+            margin-bottom: 4px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #202532;
+        }
+        .agency-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .agency-logo {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: contain;
+        }
     </style>
 </head>
 <body>
@@ -95,9 +119,46 @@ $numero = $cotation['numero']
 
     <main class="sheet">
         <header class="header">
-            <div>
-                <div class="brand">CTS</div>
-                <div class="muted">Proposition de voyage</div>
+            <div class="agency-header">
+
+                <?php if (!empty($agence['logo'])): ?>
+                    <img
+                        src="<?= base_url('uploads/agences/' . $agence['logo']) ?>"
+                        alt="<?= esc($agence['nom_agence'] ?? 'Logo') ?>"
+                        class="agency-logo"
+                    >
+                <?php endif; ?>
+
+                <div class="agency">
+                    <div class="agency-name">
+                        <?= esc($agence['nom_agence'] ?? '') ?>
+                    </div>
+
+                    <?php if (!empty($agence['adresse'])): ?>
+                        <div><?= esc($agence['adresse']) ?></div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($agence['telephone'])): ?>
+                        <div>Tél. : <?= esc($agence['telephone']) ?></div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($agence['email_contact'])): ?>
+                        <div>Email : <?= esc($agence['email_contact']) ?></div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($agence['nif'])): ?>
+                        <div>NIF : <?= esc($agence['nif']) ?></div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($agence['stat'])): ?>
+                        <div>STAT : <?= esc($agence['stat']) ?></div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($agence['rcs'])): ?>
+                        <div>RCS : <?= esc($agence['rcs']) ?></div>
+                    <?php endif; ?>
+                </div>
+
             </div>
             <div>
                 <h1><?= esc($numero) ?></h1>

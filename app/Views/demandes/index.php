@@ -49,8 +49,8 @@ $statutsLabel = [
 </div>
 
 <div class="lc-card">
-    <div class="table-responsive">
-        <table class="table align-middle mb-0">
+    <div class="table-responsive p-4">
+        <table id="demandesTable" class="table align-middle mb-0">
             <thead>
                 <tr>
                     <th>Numéro</th>
@@ -130,5 +130,55 @@ $statutsLabel = [
         </table>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        $('#demandesTable').DataTable({
+            responsive: true,
+            pageLength: 10,
+            lengthMenu: [
+                [10, 25, 50, 100, -1],
+                [10, 25, 50, 100, 'Tous']
+            ],
+
+            order: [
+                [0, 'desc']
+            ],
+
+            columnDefs: [
+                {
+                    targets: 6,
+                    orderable: false,
+                    searchable: false
+                }
+            ],
+
+            language: {
+                processing: 'Traitement en cours...',
+                search: 'Rechercher :',
+                lengthMenu: 'Afficher _MENU_ demandes',
+                info: 'Affichage de _START_ à _END_ sur _TOTAL_ demandes',
+                infoEmpty: 'Affichage de 0 à 0 sur 0 demande',
+                infoFiltered: '(filtré à partir de _MAX_ demandes)',
+                infoPostFix: '',
+                loadingRecords: 'Chargement en cours...',
+                zeroRecords: 'Aucune demande trouvée',
+                emptyTable: 'Aucune demande enregistrée',
+                paginate: {
+                    first: 'Premier',
+                    previous: 'Précédent',
+                    next: 'Suivant',
+                    last: 'Dernier'
+                },
+                aria: {
+                    sortAscending: ': activer pour trier la colonne par ordre croissant',
+                    sortDescending: ': activer pour trier la colonne par ordre décroissant'
+                }
+            }
+        });
+
+    });
+</script>
 
 <?= $this->endSection() ?>

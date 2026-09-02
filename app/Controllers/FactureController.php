@@ -10,10 +10,7 @@ use App\Models\ReservationModel;
 
 class FactureController extends BaseController
 {
-    protected function tenantId(): int
-    {
-        return (int) session('tenant_id');
-    }
+   
 
     private function buildCatalogue(): array{
         $serviceModels = [
@@ -449,7 +446,13 @@ class FactureController extends BaseController
         $ligneModel = new FactureLigneModel();
         $deviseModel = new \App\Models\DeviseModel();
 
-        $tenantId    = (int) session('tenant_id');
+        $tenantId = $this->tenantId();
+
+        if ($tenantId <= 0) {
+            return redirect()
+                ->to(site_url('factures'))
+                ->with('error', 'Session agence invalide.');
+        }
 
         $facture = $model
             ->select('
@@ -463,11 +466,22 @@ class FactureController extends BaseController
             ')
             ->join('clients', 'clients.id = factures.client_id', 'left')
             ->where('factures.id', $id)
-            ->where('factures.tenant_id', $this->tenantId())
+            ->where('factures.tenant_id', $tenantId)
             ->first();
 
         if (! $facture) {
             return redirect()->to(site_url('factures'))->with('error', 'Facture introuvable.');
+        }
+
+        $agence = $this->agence();
+
+        if (!$agence) {
+            return redirect()
+                ->to(site_url('factures'))
+                ->with(
+                    'error',
+                    'Les informations de votre agence sont introuvables.'
+                );
         }
 
         $deviseFacture = $facture['devise'] ?? 'MGA';
@@ -498,6 +512,8 @@ class FactureController extends BaseController
             'title'   => 'Facture ' . $facture['numero'],
             'facture' => $facture,
             'lignes'  => $ligneModel->where('facture_id', $id)->orderBy('ordre')->findAll(),
+            'agence' => $agence,
+            'tenant_id' => $tenantId,
             'totauxParDevise' => $totauxParDevise,
         ]);
     }

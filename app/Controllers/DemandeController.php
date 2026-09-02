@@ -24,11 +24,6 @@ class DemandeController extends BaseController
         $this->destinationModel = new DestinationModel();
     }
 
-    protected function tenantId()
-    {
-        return (int) session('tenant_id');
-    }
-
     public function index()
     {
         $demandes = $this->demandeModel

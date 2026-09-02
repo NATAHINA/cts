@@ -41,28 +41,28 @@ class CotationController extends BaseController
 
 
     public function index(){
-    $model = new CotationModel();
+        $model = new CotationModel();
 
-    $items = $model
-        ->select('
-            cotations.*,
-            clients.nom AS client_nom,
-            clients.prenom AS client_prenom,
-            clients.entreprise AS client_entreprise
-        ')
-        ->join(
-            'clients',
-            'clients.id = cotations.client_id',
-            'left'
-        )
-        ->orderBy('cotations.created_at', 'DESC')
-        ->findAll();
+        $items = $model
+            ->select('
+                cotations.*,
+                clients.nom AS client_nom,
+                clients.prenom AS client_prenom,
+                clients.entreprise AS client_entreprise
+            ')
+            ->join(
+                'clients',
+                'clients.id = cotations.client_id',
+                'left'
+            )
+            ->orderBy('cotations.created_at', 'DESC')
+            ->findAll();
 
-    return view('cotations/index', [
-        'title' => 'Cotations',
-        'items' => $items,
-    ]);
-}
+        return view('cotations/index', [
+            'title' => 'Cotations',
+            'items' => $items,
+        ]);
+    }
 
 
     public function create(){
@@ -77,77 +77,75 @@ class CotationController extends BaseController
         ]);
     }
 
-    public function store()
-{
-    $model = new CotationModel();
+    public function store(){
+        $model = new CotationModel();
 
-    $tenantId = (int) session('tenant_id');
+        $tenantId = (int) session('tenant_id');
 
-    if ($tenantId <= 0) {
+        if ($tenantId <= 0) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Agence non identifiée.');
+        }
+
+        $numero = $model->prochaineReference($tenantId);
+
+        $id = $model->insert([
+            'tenant_id'             => $tenantId,
+            'numero'                => $numero,
+
+            'client_id'             => $this->request->getPost('client_id') ?: null,
+            'demande_id'            => $this->request->getPost('demande_id') ?: null,
+            'destination_id'        => $this->request->getPost('destination_id') ?: null,
+
+            'date_depart'           => $this->request->getPost('date_depart') ?: null,
+            'date_retour'           => $this->request->getPost('date_retour') ?: null,
+
+            'nb_adultes'            => (int) ($this->request->getPost('nb_adultes') ?: 0),
+            'nb_enfants'            => (int) ($this->request->getPost('nb_enfants') ?: 0),
+            'nb_bebes'              => (int) ($this->request->getPost('nb_bebes') ?: 0),
+
+            'devise'                => $this->request->getPost('devise') ?: 'EUR',
+            'taux_change'           => (float) ($this->request->getPost('taux_change') ?: 1),
+
+            'cout_total'            => 0,
+            'marge_montant'         => 0,
+            'marge_pourcentage'     => (float) ($this->request->getPost('marge_pourcentage') ?: 0),
+
+            'reduction_montant'     => 0,
+            'reduction_pourcentage' => (float) ($this->request->getPost('reduction_pourcentage') ?: 0),
+
+            'taxe_montant'          => 0,
+            'prix_total'            => 0,
+            'prix_par_personne'     => 0,
+
+            'statut' => $this->request->getPost('statut') ?: 'brouillon',
+
+            'date_validite'         => $this->request->getPost('date_validite') ?: null,
+
+            'notes_client'          => $this->request->getPost('notes_client'),
+            'notes_interne'         => $this->request->getPost('notes_interne'),
+
+            'created_by'            => session('user_id') ?: null,
+        ]);
+
+        if (! $id) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('errors', $model->errors());
+        }
+
         return redirect()
-            ->back()
-            ->withInput()
-            ->with('error', 'Agence non identifiée.');
+            ->to(site_url('cotations/' . $id))
+            ->with(
+                'success',
+                'Cotation ' . $numero . ' créée avec succès.'
+            );
     }
 
-    $numero = $model->prochaineReference($tenantId);
-
-    $id = $model->insert([
-        'tenant_id'             => $tenantId,
-        'numero'                => $numero,
-
-        'client_id'             => $this->request->getPost('client_id') ?: null,
-        'demande_id'            => $this->request->getPost('demande_id') ?: null,
-        'destination_id'        => $this->request->getPost('destination_id') ?: null,
-
-        'date_depart'           => $this->request->getPost('date_depart') ?: null,
-        'date_retour'           => $this->request->getPost('date_retour') ?: null,
-
-        'nb_adultes'            => (int) ($this->request->getPost('nb_adultes') ?: 0),
-        'nb_enfants'            => (int) ($this->request->getPost('nb_enfants') ?: 0),
-        'nb_bebes'              => (int) ($this->request->getPost('nb_bebes') ?: 0),
-
-        'devise'                => $this->request->getPost('devise') ?: 'EUR',
-        'taux_change'           => (float) ($this->request->getPost('taux_change') ?: 1),
-
-        'cout_total'            => 0,
-        'marge_montant'         => 0,
-        'marge_pourcentage'     => (float) ($this->request->getPost('marge_pourcentage') ?: 0),
-
-        'reduction_montant'     => 0,
-        'reduction_pourcentage' => (float) ($this->request->getPost('reduction_pourcentage') ?: 0),
-
-        'taxe_montant'          => 0,
-        'prix_total'            => 0,
-        'prix_par_personne'     => 0,
-
-        'statut' => $this->request->getPost('statut') ?: 'brouillon',
-
-        'date_validite'         => $this->request->getPost('date_validite') ?: null,
-
-        'notes_client'          => $this->request->getPost('notes_client'),
-        'notes_interne'         => $this->request->getPost('notes_interne'),
-
-        'created_by'            => session('user_id') ?: null,
-    ]);
-
-    if (! $id) {
-        return redirect()
-            ->back()
-            ->withInput()
-            ->with('errors', $model->errors());
-    }
-
-    return redirect()
-        ->to(site_url('cotations/' . $id))
-        ->with(
-            'success',
-            'Cotation ' . $numero . ' créée avec succès.'
-        );
-}
-
-    public function show($id)
-{
+    public function show($id){
     $model = new CotationModel();
     $reservationModel = new ReservationModel();
     $deviseModel = new \App\Models\DeviseModel();
@@ -289,7 +287,14 @@ class CotationController extends BaseController
         $ligneModel = new CotationLigneModel();
         $deviseModel = new \App\Models\DeviseModel();
 
-        $tenantId    = (int) session('tenant_id');
+        $tenantId = $this->tenantId();
+
+        if ($tenantId <= 0) {
+            return redirect()
+                ->to(site_url('factures'))
+                ->with('error', 'Session agence invalide.');
+        }
+
 
         $cotation = $model
             ->select('
@@ -303,12 +308,24 @@ class CotationController extends BaseController
             ')
             ->join('clients', 'clients.id = cotations.client_id', 'left')
             ->where('cotations.id', $id)
+            ->where('cotations.tenant_id', $tenantId)
             ->first();
 
         if (! $cotation) {
             return redirect()
                 ->to(site_url('cotations'))
                 ->with('error', 'Cotation introuvable.');
+        }
+
+        $agence = $this->agence();
+
+        if (!$agence) {
+            return redirect()
+                ->to(site_url('factures'))
+                ->with(
+                    'error',
+                    'Les informations de votre agence sont introuvables.'
+                );
         }
 
         $deviseCotation = $cotation['devise'] ?? 'MGA';
@@ -357,6 +374,8 @@ class CotationController extends BaseController
                 ->findAll(),
             'totauxParDevise' => $totauxParDevise,
             'deviseCotation'  => $deviseCotation,
+            'agence' => $agence,
+            'tenant_id' => $tenantId,
         ]);
     }
 

@@ -9,9 +9,9 @@
     <a href="<?= site_url('vols/new') ?>" class="btn lc-btn-primary"><i class="bi bi-plus-lg me-1"></i> Ajouter</a>
 </div>
 
-<div class="lc-card p-3">
-    <div class="table-responsive">
-        <table class="table align-middle mb-0">
+<div class="lc-card">
+    <div class="table-responsive p-4">
+        <table id="volTable" class="table align-middle mb-0">
             <thead>
                 <tr class="text-secondary small">
                     <th>Compagnie</th>
@@ -47,5 +47,56 @@
         </table>
     </div>
 </div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        $('#volTable').DataTable({
+            responsive: true,
+            pageLength: 10,
+            lengthMenu: [
+                [10, 25, 50, 100, -1],
+                [10, 25, 50, 100, 'Tous']
+            ],
+
+            order: [
+                [0, 'asc']
+            ],
+
+            columnDefs: [
+                {
+                    orderable: false,
+                    searchable: false
+                }
+            ],
+
+            language: {
+                processing: 'Traitement en cours...',
+                search: 'Rechercher :',
+                lengthMenu: 'Afficher _MENU_ vols',
+                info: 'Affichage de _START_ à _END_ sur _TOTAL_ vols',
+                infoEmpty: 'Affichage de 0 à 0 sur 0 vol',
+                infoFiltered: '(filtré à partir de _MAX_ vols au total)',
+                infoPostFix: '',
+                loadingRecords: 'Chargement en cours...',
+                zeroRecords: 'Aucun vol trouvé',
+                emptyTable: 'Aucun vol enregistré',
+                paginate: {
+                    first: 'Premier',
+                    previous: 'Précédent',
+                    next: 'Suivant',
+                    last: 'Dernier'
+                },
+                aria: {
+                    sortAscending: ': activer pour trier la colonne par ordre croissant',
+                    sortDescending: ': activer pour trier la colonne par ordre décroissant'
+                }
+            }
+        });
+
+    });
+</script>
+
 
 <?= $this->endSection() ?>
